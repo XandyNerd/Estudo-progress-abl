@@ -28,6 +28,7 @@ bin/
 .DS_Store
 
 # Arquivos do Projeto Ignorados (Estudos)
+*.bat
 01-projeto-infocena/Proposta_Modernizacao_Sistema.html
 01-projeto-infocena/executaveis/
 executaveis/
