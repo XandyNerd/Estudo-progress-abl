@@ -1,4 +1,4 @@
-# Glossário: Comandos Gerais e Palavras-Chave ABL
+# Glossário: Palavras-Chave da Linguagem ABL
 
 | Palavra em Inglês | O que ela faz? |
 | :--- | :--- |
@@ -11,3 +11,5 @@
 | **LEAVE** | Sair do bloco (Igual ao break). |
 | **NEXT** | Próximo item (Igual ao continue). |
 | **UNDO** | Desfazer/Abortar (Usado em tratamento de erros). |
+| **RUN** | Executar (Chamar um outro arquivo .p ou .w). |
+| **INPUT / OUTPUT** | Entrada e Saída de parâmetros. |

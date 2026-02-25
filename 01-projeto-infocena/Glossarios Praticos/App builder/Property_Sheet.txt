@@ -1,4 +1,4 @@
-# Glossário: Property Sheet (Janela de Propriedades) - AppBuilder
+# Glossário: Propriedades do AppBuilder (Property Sheet)
 
 | Termo em Inglês | Tradução / Função |
 | :--- | :--- |
