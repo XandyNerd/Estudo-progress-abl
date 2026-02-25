@@ -45,3 +45,15 @@ Existem duas formas principais de como um ERP funciona no mundo Progress:
 ---
 *Exemplo de chamada de lógica externa:*
 RUN valida_login.p (INPUT p_usuario, INPUT p_senha, OUTPUT l_sucesso).
+
+## 4. Acesso Multi-Plataforma Simultâneo
+
+É perfeitamente possível (e comum) ter usuários acessando o mesmo sistema por meios diferentes ao mesmo tempo:
+
+*   **Usuário A:** Abre o executável `.bat` direto no Windows (Interface GUI clássica).
+*   **Usuário B:** Abre o navegador Chrome e acessa o portal da empresa (Interface Web HTML).
+
+### Como isso funciona?
+Ambos os usuários batem na mesma **Camada de Lógica (.p)** no servidor. O servidor não se importa se quem perguntou foi um botão do Windows ou um botão do site; ele apenas processa a regra de negócio e devolve o resultado.
+
+**Resultado:** Os dois usuários enxergam os mesmos dados no banco em tempo real, cada um na sua interface preferida. 🚀
