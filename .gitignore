@@ -1,4 +1,4 @@
-# Arquivos de Banco de Dados Progress
+ # Arquivos de Banco de Dados Progress
 *.db
 *.db[0-9]*
 *.b[0-9]*
@@ -27,5 +27,8 @@ debug.log
 bin/
 .DS_Store
 
-# Scripts de execução locais (opcional, mas bons para manter se não tiverem senhas)
-# executaveis/*.bat
+# Arquivos do Projeto Ignorados (Estudos)
+01-projeto-infocena/Proposta_Modernizacao_Sistema.html
+01-projeto-infocena/executaveis/
+executaveis/
+Proposta_Modernizacao_Sistema.html
