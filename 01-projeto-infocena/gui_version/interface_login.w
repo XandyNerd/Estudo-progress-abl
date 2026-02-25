@@ -1,5 +1,8 @@
 &ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI
 &ANALYZE-RESUME
+/* Connected Databases 
+          infocena         PROGRESS
+*/
 &Scoped-define WINDOW-NAME C-Win
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
 /*------------------------------------------------------------------------
@@ -50,9 +53,29 @@ CREATE WIDGET-POOL.
 /* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME winLogin
 
+/* Internal Tables (found by Frame, Query & Browse Queries)             */
+&Scoped-define INTERNAL-TABLES Usuario
+
+/* Definitions for FRAME winLogin                                       */
+&Scoped-define FIELDS-IN-QUERY-winLogin Usuario.Email Usuario.Senha 
+&Scoped-define ENABLED-FIELDS-IN-QUERY-winLogin Usuario.Email Usuario.Senha 
+&Scoped-define ENABLED-TABLES-IN-QUERY-winLogin Usuario
+&Scoped-define FIRST-ENABLED-TABLE-IN-QUERY-winLogin Usuario
+&Scoped-define QUERY-STRING-winLogin FOR EACH Usuario SHARE-LOCK
+&Scoped-define OPEN-QUERY-winLogin OPEN QUERY winLogin FOR EACH Usuario SHARE-LOCK.
+&Scoped-define TABLES-IN-QUERY-winLogin Usuario
+&Scoped-define FIRST-TABLE-IN-QUERY-winLogin Usuario
+
+
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS fiEmail FILL-IN-2 filSenha 
-&Scoped-Define DISPLAYED-OBJECTS fiEmail FILL-IN-2 filSenha 
+&Scoped-Define ENABLED-FIELDS Usuario.Email Usuario.Senha 
+&Scoped-define ENABLED-TABLES Usuario
+&Scoped-define FIRST-ENABLED-TABLE Usuario
+&Scoped-Define ENABLED-OBJECTS IMAGE-1 bntRegistrar bntLogin bntsair 
+&Scoped-Define DISPLAYED-FIELDS Usuario.Email Usuario.Senha 
+&Scoped-define DISPLAYED-TABLES Usuario
+&Scoped-define FIRST-DISPLAYED-TABLE Usuario
+
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -68,30 +91,41 @@ CREATE WIDGET-POOL.
 DEFINE VARIABLE C-Win AS WIDGET-HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
-DEFINE VARIABLE fiEmail AS CHARACTER FORMAT "X(20)":U 
-     LABEL "Email" 
-     VIEW-AS FILL-IN 
-     SIZE 16 BY 1 TOOLTIP "Insira seu email" NO-UNDO.
+DEFINE BUTTON bntLogin 
+     LABEL "Login" 
+     SIZE 15 BY 1.14.
 
-DEFINE VARIABLE FILL-IN-2 AS DECIMAL FORMAT "->>,>>9.99":U 
-     LABEL "Fill 2" 
-     VIEW-AS FILL-IN 
-     SIZE 14 BY 1 NO-UNDO.
+DEFINE BUTTON bntRegistrar 
+     LABEL "Registrar" 
+     SIZE 15 BY 1.14.
 
-DEFINE VARIABLE filSenha AS CHARACTER FORMAT "X(256)":U 
-     LABEL "Senha:" 
-     VIEW-AS FILL-IN 
-     SIZE 14 BY 1 TOOLTIP "Insira sua senha" NO-UNDO.
+DEFINE BUTTON bntsair 
+     LABEL "Sair" 
+     SIZE 15 BY 1.14.
 
+DEFINE IMAGE IMAGE-1
+     FILENAME "adeicon/blank":U
+     SIZE 12.8 BY 3.05.
+
+/* Query definitions                                                    */
+&ANALYZE-SUSPEND
+DEFINE QUERY winLogin FOR 
+      Usuario SCROLLING.
+&ANALYZE-RESUME
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME winLogin
-     fiEmail AT ROW 7.91 COL 56 COLON-ALIGNED WIDGET-ID 2
-     FILL-IN-2 AT ROW 9.81 COL 58 COLON-ALIGNED WIDGET-ID 6
-     filSenha AT ROW 9.81 COL 58 COLON-ALIGNED WIDGET-ID 8
-     "Acesso a Infocena" VIEW-AS TEXT
-          SIZE 8 BY .62 AT ROW 6 COL 59 WIDGET-ID 10
+     Usuario.Email AT ROW 6.95 COL 50 COLON-ALIGNED WIDGET-ID 2
+          VIEW-AS FILL-IN 
+          SIZE 17 BY 1 TOOLTIP "Insira seu email"
+     Usuario.Senha AT ROW 8.38 COL 50 COLON-ALIGNED WIDGET-ID 8 BLANK 
+          VIEW-AS FILL-IN 
+          SIZE 17 BY 1 TOOLTIP "Insira sua senha"
+     bntRegistrar AT ROW 10.05 COL 44 WIDGET-ID 16
+     bntLogin AT ROW 10.05 COL 61 WIDGET-ID 12
+     bntsair AT ROW 11.71 COL 53 WIDGET-ID 18
+     IMAGE-1 AT ROW 2.67 COL 51 WIDGET-ID 22
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COLUMN 1 ROW 1
@@ -149,6 +183,16 @@ THEN C-Win:HIDDEN = no.
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 
+
+/* Setting information for Queries and Browse Widgets fields            */
+
+&ANALYZE-SUSPEND _QUERY-BLOCK FRAME winLogin
+/* Query rebuild information for FRAME winLogin
+     _TblList          = "infocena.Usuario"
+     _Query            is OPENED
+*/  /* FRAME winLogin */
+&ANALYZE-RESUME
+
  
 
 
@@ -176,6 +220,14 @@ DO:
   APPLY "CLOSE":U TO THIS-PROCEDURE.
   RETURN NO-APPLY.
 END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME winLogin
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL winLogin C-Win
+ON GO OF FRAME winLogin
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -246,9 +298,13 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY fiEmail FILL-IN-2 filSenha 
+
+  {&OPEN-QUERY-winLogin}
+  GET FIRST winLogin.
+  IF AVAILABLE Usuario THEN 
+    DISPLAY Usuario.Email Usuario.Senha 
       WITH FRAME winLogin IN WINDOW C-Win.
-  ENABLE fiEmail FILL-IN-2 filSenha 
+  ENABLE IMAGE-1 Usuario.Email Usuario.Senha bntRegistrar bntLogin bntsair 
       WITH FRAME winLogin IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-winLogin}
   VIEW C-Win.
