@@ -50,6 +50,10 @@ CREATE WIDGET-POOL.
 /* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME winLogin
 
+/* Standard List Definitions                                            */
+&Scoped-Define ENABLED-OBJECTS fiEmail FILL-IN-2 filSenha 
+&Scoped-Define DISPLAYED-OBJECTS fiEmail FILL-IN-2 filSenha 
+
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
 
@@ -63,13 +67,35 @@ CREATE WIDGET-POOL.
 /* Define the widget handle for the window                              */
 DEFINE VARIABLE C-Win AS WIDGET-HANDLE NO-UNDO.
 
+/* Definitions of the field level widgets                               */
+DEFINE VARIABLE fiEmail AS CHARACTER FORMAT "X(20)":U 
+     LABEL "Email" 
+     VIEW-AS FILL-IN 
+     SIZE 16 BY 1 TOOLTIP "Insira seu email" NO-UNDO.
+
+DEFINE VARIABLE FILL-IN-2 AS DECIMAL FORMAT "->>,>>9.99":U 
+     LABEL "Fill 2" 
+     VIEW-AS FILL-IN 
+     SIZE 14 BY 1 NO-UNDO.
+
+DEFINE VARIABLE filSenha AS CHARACTER FORMAT "X(256)":U 
+     LABEL "Senha:" 
+     VIEW-AS FILL-IN 
+     SIZE 14 BY 1 TOOLTIP "Insira sua senha" NO-UNDO.
+
+
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME winLogin
+     fiEmail AT ROW 7.91 COL 56 COLON-ALIGNED WIDGET-ID 2
+     FILL-IN-2 AT ROW 9.81 COL 58 COLON-ALIGNED WIDGET-ID 6
+     filSenha AT ROW 9.81 COL 58 COLON-ALIGNED WIDGET-ID 8
+     "Acesso a Infocena" VIEW-AS TEXT
+          SIZE 8 BY .62 AT ROW 6 COL 59 WIDGET-ID 10
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COLUMN 1 ROW 1
-         SIZE 273.2 BY 33.19 WIDGET-ID 100.
+         SIZE 149.4 BY 25.81 WIDGET-ID 100.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -89,8 +115,8 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "<insert window title>"
-         HEIGHT             = 33.19
-         WIDTH              = 273.2
+         HEIGHT             = 25.81
+         WIDTH              = 149.4
          MAX-HEIGHT         = 33.19
          MAX-WIDTH          = 273.2
          VIRTUAL-HEIGHT     = 33.19
@@ -220,7 +246,10 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  VIEW FRAME winLogin IN WINDOW C-Win.
+  DISPLAY fiEmail FILL-IN-2 filSenha 
+      WITH FRAME winLogin IN WINDOW C-Win.
+  ENABLE fiEmail FILL-IN-2 filSenha 
+      WITH FRAME winLogin IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-winLogin}
   VIEW C-Win.
 END PROCEDURE.
