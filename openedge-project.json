@@ -1,0 +1,16 @@
+{
+    "name": "Estudo infocena",
+    "version": "1.0.0",
+    "prowin": true,
+    "graphicalMode": true,
+    "charset": "UTF-8",
+    "extraParameters": "",
+    "buildPath": [
+        {
+            "type": "propath",
+            "path": ".",
+            "buildDir": "bin"
+        }
+    ],
+    "dbConnections": []
+}

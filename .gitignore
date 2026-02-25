@@ -1,0 +1,31 @@
+# Arquivos de Banco de Dados Progress
+*.db
+*.db[0-9]*
+*.b[0-9]*
+*.d[0-9]*
+*.bi
+*.ai
+*.lg
+*.lk
+*.st
+*.lic
+
+# Arquivos de Cache e Temporários do Progress (Sessão Ativa)
+lbi*
+srt*
+rcd*
+*.ped
+*.tmp
+debug.log
+.pct/
+
+# Compilados (Opcional, mas recomendado não subir se puder recompilar)
+*.r
+
+# IDE (VS Code, etc)
+.vscode/
+bin/
+.DS_Store
+
+# Scripts de execução locais (opcional, mas bons para manter se não tiverem senhas)
+# executaveis/*.bat
