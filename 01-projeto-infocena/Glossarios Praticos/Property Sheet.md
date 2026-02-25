@@ -13,6 +13,40 @@ Esse guia serve como um tradutor para as opções que você vê no **AppBuilder 
 | **Format** | Formatação | Como o dado aparece (ex: `X(20)` para 20 letras, `>>9.99` para números). |
 | **Tooltip** | Dica de Ferramenta | O texto que aparece quando você deixa o mouse parado sobre o botão. |
 | **No-Undo** | Sem Desfazer | Desativa o sistema de "rollback" para essa variável (aumenta a performance). |
+| **Rectangle** | Retângulo / Bloco | Objeto usado para desenhar molduras e agrupar visualmente outros elementos. |
+| **Grid** | Grade | Aqueles pontinhos no fundo que ajudam a alinhar os objetos. |
+| **Physical Name** | Nome/Caminho Físico | O caminho real do arquivo no seu computador (ex: `data/infocena.db`). |
+| **Logical Name** | Nome Lógico | O "apelido" que o código usa para achar o banco (ex: `infocena`). |
+| **Database Field** | Campo do Banco | O campo da tela fica "amarrado" diretamente à tabela do banco de dados. |
+| **Local Variable** | Variável Local | O campo existe apenas na tela; você precisa salvar no banco via código. |
+
+---
+
+### 🛠️ Ícones Laterais (Ações)
+
+Ao lado das propriedades, você verá quatro ícones mágicos:
+
+1.  🎨 **Cores (Balde):** Muda as cores e fontes do objeto.
+2.  📝 **Triggers (Bloco de Notas):** **MUITO IMPORTANTE!** É aqui que você escreve o que o botão faz (ex: abrir outra tela).
+3.  🔍 **Dicionário:** Mostra informações do banco de dados para aquele campo.
+4.  💬 **Ajuda:** Explicação do Progress sobre o campo.
+
+---
+
+### 📋 Popup Menu (Menus de Contexto)
+
+Esta tela é aberta quando você clica em **Advanced...** -> **Popup Menu**. Ela serve para:
+
+*   **Menu Elements:** Onde você define os nomes das opções que vão aparecer.
+*   **Label:** O texto que o usuário vai ler no menu.
+*   **Accelerator:** Onde você define **Atalhos de Teclado** (ex: Ctrl+R para Registrar).
+*   **Submenus:** Use os botões `<<` e `>>` para criar níveis dentro do menu.
+*   **Ações:** Assim como nos botões, cada item de menu pode ter seu próprio código (Trigger).
+
+---
+| **Like** | Como / Igual a | O campo copia todas as propriedades (tamanho, tipo) de um campo do banco. |
+| **Left-Align** | Alinhamento à Esquerda | Alinha o objeto ou texto pelo lado esquerdo. |
+| **Right-Align** | Alinhamento à Direita | Alinha o objeto ou texto pelo lado direito. |
 | **View-As** | Visualizar Como | Define o tipo de objeto (Botão, Lista, Texto, etc.). |
 
 ---
