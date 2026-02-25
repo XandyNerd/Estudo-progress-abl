@@ -1,0 +1,38 @@
+# Glossário Progress ABL: Inglês -> Português
+
+Este guia traduz os principais termos que você encontrará no AppBuilder e no código ABL.
+
+## 1. Janela de Propriedades (Property Sheet)
+*Conforme imagem que você enviou:*
+
+| Termo em Inglês | Tradução / Função |
+| :--- | :--- |
+| **Object** | Nome da variável no código (O ID do objeto). |
+| **Label** | Rótulo (O texto que o usuário final vai ler na tela). |
+| **Define As** | Tipo de Dado (Character = Texto, Integer = Inteiro). |
+| **Format** | Máscara de entrada (X(20) significa até 20 caracteres). |
+| **Tooltip** | Dica (Texto que aparece ao passar o mouse). |
+| **Geometry** | Geometria (Posição: Column=Coluna, Row=Linha, Width=Largura). |
+| **Enable** | Habilitado (Se o usuário pode interagir com o campo). |
+| **Display** | Exibir (Se o campo deve ser mostrado na tela). |
+| **Hidden** | Escondido (Oposto do Display). |
+| **Password-Field** | Campo de Senha (Esconde os caracteres com asteriscos). |
+| **Read-Only** | Somente Leitura (O usuário vê, mas não altera). |
+| **No-Undo** | Sem Desfazer (Otimiza a memória, padrão no ABL). |
+
+## 2. Palavras-Chave do Código (Keywords)
+
+| Palavra em Inglês | O que ela faz? |
+| :--- | :--- |
+| **FIND FIRST** | Busque o primeiro registro que... |
+| **FOR EACH** | Para cada registro do banco... (Igual ao for-in do Python). |
+| **DISPLAY** | Mostre na tela. |
+| **ASSIGN** | Atribua valor (Igual ao "=" em outras linguas). |
+| **MESSAGE** | Mostre um alerta (Igual ao alert() ou print()). |
+| **ON CHOOSE** | Ao clicar (Evento de clique no botão). |
+| **LEAVE** | Sair do bloco (Igual ao break). |
+| **NEXT** | Próximo item (Igual ao continue). |
+| **UNDO** | Desfazer/Abortar (Usado em tratamento de erros). |
+
+---
+*DICA: Use este guia enquanto mexe no AppBuilder para se familiarizar com os nomes!*
