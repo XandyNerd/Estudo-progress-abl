@@ -1,4 +1,9 @@
-/* 2. CRIA A JANELINHA DE LOGIN (POR CIMA DO FUNDO) */
+/* 
+   ARQUIVO DE LÓGICA DE LOGIN
+   Este arquivo agora processa a validação para a tela interface_login.w
+*/
+
+/* --- INTERFACE ANTIGA COMENTADA (PARA ESTUDO) ---
 DEFINE VARIABLE cEmail   AS CHARACTER FORMAT "x(40)" LABEL "Email" NO-UNDO.
 DEFINE VARIABLE cSenha   AS CHARACTER FORMAT "x(20)" LABEL "Senha" NO-UNDO.
 
@@ -20,55 +25,31 @@ DEFINE FRAME f-login
          SIDE-LABELS SIZE 60 BY 9.5
          BGCOLOR 15 FGCOLOR 0 
          DEFAULT-BUTTON btn-ok CANCEL-BUTTON btn-cancel.
+-------------------------------------------------- */
 
-/* Chama a tela de registro */
-ON CHOOSE OF btn-reg IN FRAME f-login
-DO:
-    RUN registrar.p.
-END.
+/* Parâmetros recebidos da interface_login.w */
+DEFINE INPUT PARAMETER pEmail AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER pSenha AS CHARACTER NO-UNDO.
+DEFINE OUTPUT PARAMETER pSucesso AS LOGICAL NO-UNDO.
 
 /* Conectar ao banco local se ainda nao estiver conectado */
 IF NOT CONNECTED("infocena") THEN
-    CONNECT "data/infocena.db" -1.
+    CONNECT "01-projeto-infocena/data/infocena.db" -1.
 
-ON CHOOSE OF btn-ok IN FRAME f-login
-DO:
-    ASSIGN cEmail cSenha.
+/* LÓGICA DE VALIDAÇÃO */
+pSucesso = FALSE.
 
-    IF cEmail = "" THEN DO:
-        MESSAGE "Por favor, informe o email!" VIEW-AS ALERT-BOX ERROR.
-        APPLY "ENTRY" TO cEmail.
-        RETURN NO-APPLY.
-    END.
-
-    /* Validar as credenciais no banco de dados Progress */
-    FIND FIRST Usuario WHERE Usuario.Email = cEmail  NO-LOCK NO-ERROR.
-    
-    IF AVAILABLE(Usuario) AND Usuario.Senha = cSenha THEN DO:
-        /* Esconde a tela de login imediatamente */
-        FRAME f-login:VISIBLE = FALSE.
-        
-        /* Abre o Menu Principal e passa o nome do usuario */
-        RUN menu.p (INPUT Usuario.Nome).
-        
-        /* Fecha o processo do login em background */
-        APPLY "CLOSE" TO THIS-PROCEDURE.
-    END.
-    ELSE DO:
-        MESSAGE "Email ou senha incorretos." VIEW-AS ALERT-BOX ERROR.
-        APPLY "ENTRY" TO cEmail.
-        RETURN NO-APPLY.
-    END.
+IF pEmail = "" THEN DO:
+    MESSAGE "Por favor, informe o email!" VIEW-AS ALERT-BOX ERROR.
+    RETURN.
 END.
 
-ON CHOOSE OF btn-cancel IN FRAME f-login
-DO:
-    MESSAGE "Operacao cancelada." VIEW-AS ALERT-BOX WARNING.
-    APPLY "CLOSE" TO THIS-PROCEDURE.
+/* Validar as credenciais no banco de dados Progress */
+FIND FIRST Usuario WHERE Usuario.Email = pEmail NO-LOCK NO-ERROR.
+
+IF AVAILABLE(Usuario) AND Usuario.Senha = pSenha THEN DO:
+    pSucesso = TRUE.
 END.
-
-/* Ativa a telinha de login */
-ENABLE ALL WITH FRAME f-login.
-
-/* Pausa a execucao ate o usuario fechar a caixinha de login */
-WAIT-FOR CLOSE OF THIS-PROCEDURE.
+ELSE DO:
+    MESSAGE "Email ou senha incorretos." VIEW-AS ALERT-BOX ERROR.
+END.

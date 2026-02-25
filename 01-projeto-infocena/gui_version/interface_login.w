@@ -228,6 +228,63 @@ END.
 &Scoped-define SELF-NAME winLogin
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL winLogin C-Win
 ON GO OF FRAME winLogin
+DO:
+  APPLY "CHOOSE" TO bntLogin.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME bntLogin
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bntLogin C-Win
+ON CHOOSE OF bntLogin IN FRAME winLogin /* Login */
+DO:
+  DEFINE VARIABLE lSucesso AS LOGICAL NO-UNDO.
+
+  /* Captura os valores digitados na tela */
+  ASSIGN Usuario.Email Usuario.Senha.
+
+  /* Chama o arquivo de lógica passando os dados */
+  RUN valida_login.p (INPUT Usuario.Email, 
+                      INPUT Usuario.Senha, 
+                      OUTPUT lSucesso).
+
+  IF lSucesso THEN DO:
+      /* Busca o registro do usuário para pegar o Nome real */
+      FIND FIRST Usuario WHERE Usuario.Email = Usuario.Email NO-LOCK NO-ERROR.
+      
+      MESSAGE "Login realizado com sucesso! Bem-vindo(a), " + (IF AVAILABLE Usuario THEN Usuario.Nome ELSE Usuario.Email) + "." 
+              VIEW-AS ALERT-BOX INFORMATION.
+      
+      /* Abre o menu passando o nome real */
+      RUN menu.p (INPUT (IF AVAILABLE Usuario THEN Usuario.Nome ELSE Usuario.Email)). 
+      
+      APPLY "CLOSE" TO THIS-PROCEDURE.
+  END.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME bntRegistrar
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bntRegistrar C-Win
+ON CHOOSE OF bntRegistrar IN FRAME winLogin /* Registrar */
+DO:
+  RUN registrar.p.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME bntsair
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL bntsair C-Win
+ON CHOOSE OF bntsair IN FRAME winLogin /* Sair */
+DO:
+  QUIT.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
