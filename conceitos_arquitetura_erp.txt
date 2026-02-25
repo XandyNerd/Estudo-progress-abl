@@ -29,3 +29,19 @@ Existem duas formas principais de como um ERP funciona no mundo Progress:
 
 ---
 *Documento de estudo sobre arquitetura Progress OpenEdge.*
+
+## 3. Organização de Código: Lógica vs. Interface
+
+### Opção A: Lógica no arquivo .w (Monolítico)
+*   **O que é:** O código de validação (ex: busca no banco) fica dentro do objeto da tela.
+*   **Vantagem:** Desenvolvimento mais rápido; tudo em um só lugar.
+*   **Desvantagem:** Prisão tecnológica. Se precisar do mesmo login em uma página Web, terá que duplicar o código.
+
+### Opção B: Lógica no arquivo .p (Arquitetura em Camadas)
+*   **O que é:** A interface (.w) apenas captura os dados e chama um procedimento (.p) externo para processar.
+*   **Vantagem:** REUSO. O mesmo .p de lógica pode servir para GUI, Web, Mobile e Integrações.
+*   **Conceito Profissional:** "Business Logic Layer" (Camada de Regras de Negócio).
+
+---
+*Exemplo de chamada de lógica externa:*
+RUN valida_login.p (INPUT p_usuario, INPUT p_senha, OUTPUT l_sucesso).
