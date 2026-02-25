@@ -1,0 +1,31 @@
+# Arquitetura de Sistemas ERP (Progress OpenEdge ABL)
+
+Existem duas formas principais de como um ERP funciona no mundo Progress:
+
+---
+
+## 1. Modelo Clássico (Client-Server)
+- **Onde roda a lógica?** No computador do cliente.
+- **Papel do Servidor:** Apenas gerenciar o Banco de Dados.
+- **Como funciona:** O aplicativo na máquina do usuário conecta diretamente ao banco via rede. 
+- **Desvantagem:** Se a rede for lenta, o sistema trava, pois trafega muitos dados brutos.
+
+## 2. Modelo Moderno (Three-Tier / PASOE)
+- **Onde roda a lógica?** No Servidor de Aplicação (PASOE).
+- **Papel do Servidor:** É o "Cérebro". Toma as decisões, valida regras e acessa o banco.
+- **Papel do Cliente:** É apenas o "Rosto". Desenha a tela e envia comandos para o servidor.
+- **Vantagem:** Muito mais rápido e seguro. Ideal para rodar sistemas via Web ou Cloud.
+
+---
+
+## Comparação com Desenvolvimento Web:
+
+| Conceito Web | Equivalente Progress ABL (Moderno) |
+| :--- | :--- |
+| **Frontend** (React/HTML) | **Interface GUI** (.w ou .p visual) |
+| **Backend** (Node.js/Python) | **PASOE** (Onde o código ABL de servidor roda) |
+| **SQL Database** | **Progress DB** (O banco .db) |
+| **API / Endpoint** | **Chamada de Procedimento** (Ex: RUN arquivo.p ON SERVER) |
+
+---
+*Documento de estudo sobre arquitetura Progress OpenEdge.*
