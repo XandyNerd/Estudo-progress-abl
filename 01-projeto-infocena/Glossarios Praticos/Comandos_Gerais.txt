@@ -1,0 +1,13 @@
+# Glossário: Comandos Gerais e Palavras-Chave ABL
+
+| Palavra em Inglês | O que ela faz? |
+| :--- | :--- |
+| **FIND FIRST** | Busque o primeiro registro que... |
+| **FOR EACH** | Para cada registro do banco... (Igual ao for-in do Python). |
+| **DISPLAY** | Mostre na tela. |
+| **ASSIGN** | Atribua valor (Igual ao "=" em outras linguas). |
+| **MESSAGE** | Mostre um alerta (Igual ao alert() ou print()). |
+| **ON CHOOSE** | Ao clicar (Evento de clique no botão). |
+| **LEAVE** | Sair do bloco (Igual ao break). |
+| **NEXT** | Próximo item (Igual ao continue). |
+| **UNDO** | Desfazer/Abortar (Usado em tratamento de erros). |
