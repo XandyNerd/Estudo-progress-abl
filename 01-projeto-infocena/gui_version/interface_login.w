@@ -171,6 +171,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON "F2":U ANYWHERE 
 DO:
+  /* Bloqueia o F2 se a tela de login ja estiver oculta/processando */
+  IF C-Win:HIDDEN = YES THEN RETURN NO-APPLY.
   /* Captura dimensoes da tela atual do Login */
   DEFINE VARIABLE iState  AS INTEGER NO-UNDO.
   DEFINE VARIABLE iWidth  AS INTEGER NO-UNDO.
