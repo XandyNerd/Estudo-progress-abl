@@ -31,8 +31,8 @@ DEFINE INPUT-OUTPUT PARAMETER pioY AS INTEGER NO-UNDO.
 &Scoped-define FRAME-NAME fMain
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS LogoInfocena btn-sup btn-fin btn-qua btn-ctr ~
-btn-man btn-org btn-ser btn-tec btn-com btn-sol btn-sair 
+&Scoped-Define ENABLED-OBJECTS LogoInfocena btn-sup btn-fin btn-tec btn-com ~
+btn-sair 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -208,7 +208,45 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btn-com C-Win
 ON CHOOSE OF btn-com IN FRAME fMain /* COMERCIAL */
 DO:
-  RUN menu_logica.p (INPUT pUsuarioNome, INPUT "COMERCIAL").
+  /* Captura dimensoes da tela atual do Menu */
+  DEFINE VARIABLE iState  AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iWidth  AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iHeight AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iX      AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iY      AS INTEGER NO-UNDO.
+  
+  ASSIGN iState  = C-Win:WINDOW-STATE
+         iWidth  = C-Win:WIDTH-PIXELS
+         iHeight = C-Win:HEIGHT-PIXELS
+         iX      = C-Win:X
+         iY      = C-Win:Y NO-ERROR.
+
+  ASSIGN C-Win:VISIBLE = NO
+         C-Win:HIDDEN  = YES.
+         
+  RUN interface_comercial.w (INPUT pUsuarioNome,
+                             INPUT-OUTPUT iState,
+                             INPUT-OUTPUT iWidth,
+                             INPUT-OUTPUT iHeight,
+                             INPUT-OUTPUT iX,
+                             INPUT-OUTPUT iY).
+                             
+  /* Restaura a janela com o clone da posicao que o modulo foi fechado */
+  ASSIGN C-Win:WINDOW-STATE = iState NO-ERROR.
+  IF iState <> 3 THEN DO:
+      ASSIGN C-Win:WIDTH-PIXELS  = iWidth
+             C-Win:HEIGHT-PIXELS = iHeight
+             C-Win:X             = iX
+             C-Win:Y             = iY NO-ERROR.
+  END.
+  
+  ASSIGN C-Win:VISIBLE = YES
+         C-Win:HIDDEN  = NO.
+         
+  /* Recentraliza os campos */
+  IF VALID-HANDLE(FRAME fMain:HANDLE) THEN
+      ASSIGN FRAME fMain:X = (C-Win:WIDTH-PIXELS - FRAME fMain:WIDTH-PIXELS) / 2
+             FRAME fMain:Y = (C-Win:HEIGHT-PIXELS - FRAME fMain:HEIGHT-PIXELS) / 2 NO-ERROR.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -402,8 +440,7 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  ENABLE LogoInfocena btn-sup btn-fin btn-qua btn-ctr btn-man btn-org btn-ser 
-         btn-tec btn-com btn-sol btn-sair 
+  ENABLE LogoInfocena btn-sup btn-fin btn-tec btn-com btn-sair 
       WITH FRAME fMain IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-fMain}
   VIEW C-Win.

@@ -1,0 +1,93 @@
+ADD TABLE "Cliente"
+  AREA "Schema Area"
+  DUMP-NAME "cliente"
+
+ADD FIELD "CodCliente" OF "Cliente" AS integer 
+  DESCRIPTION "Codigo de identificacao do cliente"
+  FORMAT ">>>>>>>9"
+  INITIAL 0
+  LABEL "Codigo"
+  POSITION 2
+  MAX-WIDTH 4
+  HELP "Insira o codigo do cliente"
+  ORDER 10
+
+ADD FIELD "Nome" OF "Cliente" AS character 
+  DESCRIPTION "Nome ou Razao Social"
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Nome / Razao Social"
+  POSITION 3
+  MAX-WIDTH 120
+  HELP "Insira o nome completo ou razao social"
+  ORDER 20
+
+ADD FIELD "Fantasia" OF "Cliente" AS character 
+  DESCRIPTION "Nome Fantasia"
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Nome Fantasia"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "CNPJ-CPF" OF "Cliente" AS character 
+  DESCRIPTION "Documento de identificacao fiscal"
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "CNPJ / CPF"
+  POSITION 5
+  MAX-WIDTH 40
+  ORDER 40
+
+ADD FIELD "Endereco" OF "Cliente" AS character 
+  DESCRIPTION "Logradouro e Numero"
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Endereco"
+  POSITION 6
+  MAX-WIDTH 120
+  ORDER 50
+
+ADD FIELD "Cidade" OF "Cliente" AS character 
+  DESCRIPTION "Cidade do cliente"
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Cidade"
+  POSITION 7
+  MAX-WIDTH 60
+  ORDER 60
+
+ADD FIELD "Estado" OF "Cliente" AS character 
+  DESCRIPTION "Sigla do Estado (UF)"
+  FORMAT "x(2)"
+  INITIAL ""
+  LABEL "UF"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "LimiteCredito" OF "Cliente" AS decimal 
+  DESCRIPTION "Limite de credito concedido"
+  FORMAT "->,>>>,>>9.99"
+  INITIAL 0
+  LABEL "Limite de Credito"
+  POSITION 9
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 80
+
+ADD INDEX "pk_cliente" ON "Cliente" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CodCliente" ASCENDING 
+
+ADD INDEX "idx_nome" ON "Cliente" 
+  AREA "Schema Area"
+  INDEX-FIELD "Nome" ASCENDING 
+
+ADD INDEX "idx_cnpj" ON "Cliente" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "CNPJ-CPF" ASCENDING 

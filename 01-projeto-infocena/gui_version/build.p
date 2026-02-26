@@ -1,1 +1,11 @@
+/* build.p */
 COMPILE interface_login.w SAVE.
+COMPILE interface_menu.w SAVE.
+COMPILE interface_Registro.w SAVE.
+COMPILE menu_logica.p SAVE.
+COMPILE valida_login.p SAVE.
+COMPILE valida_registro.p SAVE.
+COMPILE interface_comercial.w SAVE.
+COMPILE logica_comercial.p SAVE.
+COMPILE interface_comercial.w SAVE.
+COMPILE logica_comercial.p SAVE.

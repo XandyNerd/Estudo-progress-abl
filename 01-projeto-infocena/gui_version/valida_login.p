@@ -5,7 +5,7 @@ DEFINE OUTPUT PARAMETER pSucesso AS LOGICAL NO-UNDO.
 
 /* Conectar ao banco local se ainda nao estiver conectado */
 IF NOT CONNECTED("infocena") THEN
-    CONNECT "01-projeto-infocena/data/infocena.db" -1.
+    CONNECT "..\data\infocena.db" -1.
 
 /* LÓGICA DE VALIDAÇÃO */
 pSucesso = FALSE.
