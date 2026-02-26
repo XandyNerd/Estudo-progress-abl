@@ -224,6 +224,9 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL winLogin C-Win
 ON GO OF FRAME winLogin
 DO:
+  /* Absorve a tecla ENTER caso os campos estejam vazios, evitando bleed-through (teclas fantasmas de alertas anteriores) */
+  IF cEmail:SCREEN-VALUE IN FRAME winLogin = "" THEN RETURN NO-APPLY.
+  
   APPLY "CHOOSE" TO bntLogin.
 END.
 
