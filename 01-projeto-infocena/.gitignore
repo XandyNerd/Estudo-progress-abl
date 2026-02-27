@@ -1,0 +1,31 @@
+# Progress OpenEdge compiled files
+*.r
+*.db
+*.lg
+*.b1
+*.d1
+*.st
+*.lic
+*.lk
+
+# AppBuilder backup files
+*.wrk
+*.wrx
+
+# Environment variables
+.env
+
+# Logs and temp files
+*.log
+tables.txt
+fields.txt
+fields_check.txt
+
+# Progress Temporary files
+lbi*
+dbi*
+srt*
+rcd*
+pica*
+*.tmp
+api_*_res.json

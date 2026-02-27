@@ -186,7 +186,7 @@ DO:
          iY      = C-Win:Y NO-ERROR.
 
   /* Bypass de Login (F2) */
-  ASSIGN C-Win:VISIBLE = NO
+  ASSIGN C-Win:VISIBLE = NO 
          C-Win:HIDDEN  = YES.
   
   RUN interface_menu.w (INPUT "Desenvolvedor",

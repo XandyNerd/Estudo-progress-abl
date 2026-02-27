@@ -4,7 +4,7 @@
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
 
 /* Variáveis de Controle de Clientes */
-DEFINE VARIABLE lModoEdicao AS LOGICAL NO-UNDO INITIAL FALSE.
+/* lEmEdicao controla o estado dinamico da interface */
 /*------------------------------------------------------------------------
   File: interface_comercial.w
   Description: Módulo Comercial ERP Infocena
@@ -76,10 +76,8 @@ DEFINE BROWSE brClientes QUERY qClientes NO-LOCK
     WITH NO-ROW-MARKERS SEPARATORS SIZE 124 BY 8 FIT-LAST-COLUMN.
 
 /* Botoes de Clientes */
-DEFINE BUTTON btnNovo     LABEL "&Novo"     SIZE 15 BY 1.14.
+DEFINE VARIABLE lEmEdicao    AS LOGICAL   INITIAL NO NO-UNDO.
 DEFINE BUTTON btnSalvar   LABEL "&Salvar"   SIZE 15 BY 1.14.
-DEFINE BUTTON btnExcluir  LABEL "&Excluir"  SIZE 15 BY 1.14.
-DEFINE BUTTON btnCancelar LABEL "&Cancelar" SIZE 15 BY 1.14.
 DEFINE BUTTON btnVoltarCli LABEL "&Voltar"   SIZE 15 BY 1.14.
 
 /* Campos de Edicao */
@@ -106,11 +104,16 @@ DEFINE VARIABLE cUF         AS CHARACTER FORMAT "x(2)"  LABEL "UF"
 DEFINE VARIABLE cRef        AS CHARACTER FORMAT "x(100)" LABEL "Pto. Ref." VIEW-AS FILL-IN SIZE 50 BY 1 NO-UNDO.
 
 
+/* Menu de Contexto para Clientes */
+DEFINE MENU mPopupCli
+    MENU-ITEM mEditarCli  LABEL "Editar Cliente"
+    MENU-ITEM mExcluirCli LABEL "Excluir Cliente".
+
 DEFINE RECTANGLE rectDados   SIZE 124 BY 5.5.
 DEFINE RECTANGLE rectEnd     SIZE 124 BY 5.
 
 DEFINE RECTANGLE rectFundo SIZE 126 BY 20.
-DEFINE RECTANGLE RectTopo  SIZE 130 BY 4.5 BGCOLOR 1.
+DEFINE RECTANGLE RectTopo  SIZE 130 BY 4.5 BGCOLOR 1 FGCOLOR 15.
 
 /* ************************  Frame Definitions  *********************** */
 
@@ -131,32 +134,30 @@ DEFINE FRAME fClientes
     "DADOS BASICOS" AT ROW 13.5 COL 5 FONT 6
     rectDados   AT ROW 14 COL 3
     cTipo       AT ROW 15.0 COL 12 COLON-ALIGNED
-    cCNPJ       AT ROW 15.0 COL 65 COLON-ALIGNED
+    cCNPJ       AT ROW 15.0 COL 60 COLON-ALIGNED
+    iCod        AT ROW 15.0 COL 105 COLON-ALIGNED
     cNome       AT ROW 16.0 COL 12 COLON-ALIGNED
     cTelefone   AT ROW 17.0 COL 12 COLON-ALIGNED
-    cEmail      AT ROW 17.0 COL 50 COLON-ALIGNED
-    dLimite     AT ROW 17.0 COL 95 COLON-ALIGNED
+    cEmail      AT ROW 17.0 COL 40 COLON-ALIGNED
+    dLimite     AT ROW 17.0 COL 105 COLON-ALIGNED
     
     "ENDERECO"  AT ROW 19.5 COL 5 FONT 6
     rectEnd     AT ROW 20.0 COL 3
     cCEP        AT ROW 21.0 COL 12 COLON-ALIGNED
-    cEnd        AT ROW 21.0 COL 35 COLON-ALIGNED
+    cEnd        AT ROW 21.0 COL 28 COLON-ALIGNED
     cNum        AT ROW 22.0 COL 12 COLON-ALIGNED
-    cComp       AT ROW 22.0 COL 35 COLON-ALIGNED
-    cBairro     AT ROW 22.0 COL 80 COLON-ALIGNED
+    cComp       AT ROW 22.0 COL 28 COLON-ALIGNED
+    cBairro     AT ROW 22.0 COL 85 COLON-ALIGNED
     cCid        AT ROW 23.0 COL 12 COLON-ALIGNED
-    cUF         AT ROW 23.0 COL 55 COLON-ALIGNED
-    cRef        AT ROW 23.0 COL 70 COLON-ALIGNED
+    cUF         AT ROW 23.0 COL 48 COLON-ALIGNED
+    cRef        AT ROW 23.0 COL 65 COLON-ALIGNED
 
-    btnNovo      AT ROW 25.5 COL 5
-    btnSalvar    AT ROW 25.5 COL 22
-    btnExcluir   AT ROW 25.5 COL 39
-    btnCancelar  AT ROW 25.5 COL 56
+    btnSalvar    AT ROW 25.5 COL 5
     btnVoltarCli AT ROW 25.5 COL 110
 
     RectTopo    AT ROW 1 COL 1
     "MODULO COMERCIAL - CADASTRO DE CLIENTES" VIEW-AS TEXT
-      SIZE 50 BY 1 AT ROW 2.5 COL 55 FONT 6
+      SIZE 60 BY 1 AT ROW 2.5 COL 42.5 FONT 6 BGCOLOR 1 FGCOLOR 15
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COLUMN 1 ROW 1
@@ -327,8 +328,29 @@ ON ANY-PRINTABLE OF cTelefone IN FRAME fClientes DO:
                             SUBSTRING(cVal,3,1) + " " + 
                             SUBSTRING(cVal,4,4) + "-" + 
                             SUBSTRING(cVal,8,4).
+        RUN ficarEmEdicao.
         RETURN NO-APPLY.
     END.
+END.
+
+/* Detectar alteracoes */
+ON ANY-KEY OF cNome IN FRAME fClientes,
+              cEmail IN FRAME fClientes,
+              cCNPJ IN FRAME fClientes,
+              cTelefone IN FRAME fClientes,
+              cCEP IN FRAME fClientes,
+              cEnd IN FRAME fClientes,
+              cNum IN FRAME fClientes,
+              cComp IN FRAME fClientes,
+              cBairro IN FRAME fClientes,
+              cCid IN FRAME fClientes,
+              cRef IN FRAME fClientes DO:
+    RUN ficarEmEdicao.
+END.
+
+ON VALUE-CHANGED OF cTipo IN FRAME fClientes,
+                   cUF IN FRAME fClientes DO:
+    RUN ficarEmEdicao.
 END.
 
 ON ANY-PRINTABLE OF cCEP IN FRAME fClientes DO:
@@ -340,32 +362,48 @@ ON ANY-PRINTABLE OF cCEP IN FRAME fClientes DO:
 END.
 
 /* GATILHOS DO FRAME DE CLIENTES */
-ON CHOOSE OF btnVoltarCli IN FRAME fClientes DO:
-    HIDE FRAME fClientes.
-    RUN enable_UI.
+ON VALUE-CHANGED OF brClientes IN FRAME fClientes DO:
+    /* Apenas marca o ID mas nao carrega visualmente nada */
 END.
 
-ON CHOOSE OF btnNovo IN FRAME fClientes DO:
-    ASSIGN lModoEdicao = TRUE.
-    RUN habilita_campos.
-    RUN limpa_campos.
-    APPLY "ENTRY" TO cNome IN FRAME fClientes.
+ON CHOOSE OF MENU-ITEM mEditarCli IN MENU mPopupCli DO:
+    IF NOT AVAILABLE Cliente THEN RETURN.
+    
+    ASSIGN iCod:SCREEN-VALUE IN FRAME fClientes       = STRING(Cliente.CodCliente)
+           cNome:SCREEN-VALUE IN FRAME fClientes      = Cliente.Nome
+           cCNPJ:SCREEN-VALUE IN FRAME fClientes      = Cliente.CNPJ-CPF
+           cEmail:SCREEN-VALUE IN FRAME fClientes     = Cliente.Email
+           cTelefone:SCREEN-VALUE IN FRAME fClientes  = Cliente.Telefone
+           dLimite:SCREEN-VALUE IN FRAME fClientes    = STRING(Cliente.LimiteCredito)
+           cCEP:SCREEN-VALUE IN FRAME fClientes       = Cliente.CEP
+           cEnd:SCREEN-VALUE IN FRAME fClientes       = Cliente.Endereco
+           cNum:SCREEN-VALUE IN FRAME fClientes       = Cliente.Numero
+           cComp:SCREEN-VALUE IN FRAME fClientes      = Cliente.Complemento
+           cBairro:SCREEN-VALUE IN FRAME fClientes    = Cliente.Bairro
+           cCid:SCREEN-VALUE IN FRAME fClientes       = Cliente.Cidade
+           cUF:SCREEN-VALUE IN FRAME fClientes        = Cliente.Estado
+           cRef:SCREEN-VALUE IN FRAME fClientes       = Cliente.PontoReferencia.
+    
+    lEmEdicao = YES.
+    RUN atualizarEstadoUI.
 END.
 
-ON CHOOSE OF btnSalvar IN FRAME fClientes DO:
-    RUN salvar_cliente.
-END.
-
-ON CHOOSE OF btnExcluir IN FRAME fClientes DO:
+ON CHOOSE OF MENU-ITEM mExcluirCli IN MENU mPopupCli DO:
     MESSAGE "Deseja realmente excluir este cliente?" VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lResposta AS LOGICAL.
     IF lResposta THEN RUN excluir_cliente.
 END.
 
-ON CHOOSE OF btnCancelar IN FRAME fClientes DO:
-    ASSIGN lModoEdicao = FALSE.
-    RUN habilita_campos.
-    RUN limpa_campos.
+ON CHOOSE OF btnVoltarCli IN FRAME fClientes DO:
+    IF lEmEdicao THEN DO:
+        RUN limparCamposClientes.
+    END.
+    ELSE DO:
+        HIDE FRAME fClientes.
+        RUN enable_UI.
+    END.
 END.
+
+/* Botoes Novo, Excluir e Cancelar foram removidos por sugestao do usuario */
 
 ON LEAVE OF cCEP IN FRAME fClientes DO:
     IF SELF:SCREEN-VALUE <> "" THEN RUN busca_cep.
@@ -390,7 +428,9 @@ PAUSE 0 BEFORE-HIDE.
 MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
-  
+  /* Padroniza para formato brasileiro (ponto para milhar, virgula para decimal) */
+  SESSION:NUMERIC-FORMAT = "European".
+
   RUN enable_UI.
   
   /* Aplica o tamanho herdado da tela antiga ou maximiza por padrao */
@@ -412,9 +452,10 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
       ASSIGN FRAME fMain:X = (C-Win:WIDTH-PIXELS - FRAME fMain:WIDTH-PIXELS) / 2
              FRAME fMain:Y = (C-Win:HEIGHT-PIXELS - FRAME fMain:HEIGHT-PIXELS) / 2.
 
-  IF VALID-HANDLE(FRAME fClientes:HANDLE) THEN
+  IF VALID-HANDLE(FRAME fClientes:HANDLE) THEN DO:
       ASSIGN FRAME fClientes:X = (C-Win:WIDTH-PIXELS - FRAME fClientes:WIDTH-PIXELS) / 2
              FRAME fClientes:Y = (C-Win:HEIGHT-PIXELS - FRAME fClientes:HEIGHT-PIXELS) / 2.
+  END.
 
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
@@ -453,10 +494,13 @@ END PROCEDURE.
 
 PROCEDURE enable_fClientes:
     OPEN QUERY qClientes FOR EACH Cliente.
-    ENABLE brClientes btnNovo btnSalvar btnExcluir btnCancelar btnVoltarCli 
-           cTipo cNome cCNPJ cEmail cTelefone dLimite
+    ENABLE brClientes btnSalvar btnVoltarCli 
+           cTipo iCod cNome cCNPJ cEmail cTelefone dLimite
            cCEP cEnd cNum cComp cBairro cCid cUF cRef
            WITH FRAME fClientes IN WINDOW C-Win.
+    
+    ASSIGN brClientes:POPUP-MENU IN FRAME fClientes = MENU mPopupCli:HANDLE.
+    RUN limparCamposClientes.
     
     /* Exibe o frame redesenhado */
     VIEW FRAME fClientes.
@@ -467,33 +511,46 @@ PROCEDURE enable_fClientes:
 END PROCEDURE.
 
 PROCEDURE habilita_campos:
-    /* Ativa campos apenas em modo de edicao */
-    ASSIGN cNome:SENSITIVE IN FRAME fClientes     = lModoEdicao
-           cCNPJ:SENSITIVE IN FRAME fClientes     = lModoEdicao
-           cEmail:SENSITIVE IN FRAME fClientes    = lModoEdicao
-           cTelefone:SENSITIVE IN FRAME fClientes = lModoEdicao
-           dLimite:SENSITIVE IN FRAME fClientes   = lModoEdicao
-           cCEP:SENSITIVE IN FRAME fClientes      = lModoEdicao
-           cEnd:SENSITIVE IN FRAME fClientes      = lModoEdicao
-           cNum:SENSITIVE IN FRAME fClientes      = lModoEdicao
-           cComp:SENSITIVE IN FRAME fClientes     = lModoEdicao
-           cBairro:SENSITIVE IN FRAME fClientes   = lModoEdicao
-           cCid:SENSITIVE IN FRAME fClientes      = lModoEdicao
-           cUF:SENSITIVE IN FRAME fClientes       = lModoEdicao
-           cRef:SENSITIVE IN FRAME fClientes      = lModoEdicao
-           cTipo:SENSITIVE IN FRAME fClientes     = lModoEdicao.
+    /* Ativa/Desativa campos e browse dependendo do estado de edicao */
+    ASSIGN cNome:SENSITIVE IN FRAME fClientes     = YES /* Sempre editaveis agora no novo padrao */
+           cCNPJ:SENSITIVE IN FRAME fClientes     = YES
+           cEmail:SENSITIVE IN FRAME fClientes    = YES
+           cTelefone:SENSITIVE IN FRAME fClientes = YES
+           dLimite:SENSITIVE IN FRAME fClientes   = YES
+           cCEP:SENSITIVE IN FRAME fClientes      = YES
+           cEnd:SENSITIVE IN FRAME fClientes      = YES
+           cNum:SENSITIVE IN FRAME fClientes      = YES
+           cComp:SENSITIVE IN FRAME fClientes     = YES
+           cBairro:SENSITIVE IN FRAME fClientes   = YES
+           cCid:SENSITIVE IN FRAME fClientes      = YES
+           cUF:SENSITIVE IN FRAME fClientes       = YES
+           cRef:SENSITIVE IN FRAME fClientes      = YES
+           cTipo:SENSITIVE IN FRAME fClientes     = YES.
     
-    /* Controla Botoes */
-    ASSIGN btnSalvar:SENSITIVE IN FRAME fClientes    = lModoEdicao
-           btnCancelar:SENSITIVE IN FRAME fClientes  = lModoEdicao
-           btnNovo:SENSITIVE IN FRAME fClientes      = NOT lModoEdicao
-           btnExcluir:SENSITIVE IN FRAME fClientes   = NOT lModoEdicao
-           btnVoltarCli:SENSITIVE IN FRAME fClientes  = NOT lModoEdicao
-           brClientes:SENSITIVE IN FRAME fClientes   = NOT lModoEdicao.
+    ASSIGN brClientes:SENSITIVE IN FRAME fClientes = NOT lEmEdicao.
 END PROCEDURE.
 
-PROCEDURE limpa_campos:
-    ASSIGN cNome:SCREEN-VALUE IN FRAME fClientes     = ""
+PROCEDURE ficarEmEdicao:
+    IF NOT lEmEdicao THEN DO:
+        lEmEdicao = YES.
+        RUN atualizarEstadoUI.
+    END.
+END PROCEDURE.
+
+PROCEDURE atualizarEstadoUI:
+    IF lEmEdicao THEN DO:
+        ASSIGN btnSalvar:HIDDEN IN FRAME fClientes = NO
+               btnVoltarCli:LABEL  IN FRAME fClientes = "Cancelar".
+    END.
+    ELSE DO:
+        ASSIGN btnSalvar:HIDDEN IN FRAME fClientes = YES
+               btnVoltarCli:LABEL  IN FRAME fClientes = "Voltar".
+    END.
+END PROCEDURE.
+
+PROCEDURE limparCamposClientes:
+    ASSIGN iCod:SCREEN-VALUE IN FRAME fClientes      = "0"
+           cNome:SCREEN-VALUE IN FRAME fClientes     = ""
            cCNPJ:SCREEN-VALUE IN FRAME fClientes     = ""
            cEmail:SCREEN-VALUE IN FRAME fClientes    = ""
            cTelefone:SCREEN-VALUE IN FRAME fClientes = ""
@@ -505,7 +562,11 @@ PROCEDURE limpa_campos:
            cBairro:SCREEN-VALUE IN FRAME fClientes   = ""
            cCid:SCREEN-VALUE IN FRAME fClientes      = ""
            cUF:SCREEN-VALUE IN FRAME fClientes       = ""
-           cRef:SCREEN-VALUE IN FRAME fClientes      = "".
+           cRef:SCREEN-VALUE IN FRAME fClientes      = ""
+           lEmEdicao                                 = NO.
+    
+    RUN atualizarEstadoUI.
+    APPLY "ENTRY" TO cNome IN FRAME fClientes.
 END PROCEDURE.
 
 PROCEDURE salvar_cliente:
@@ -560,9 +621,8 @@ PROCEDURE salvar_cliente:
 
     MESSAGE "Cliente salvo com sucesso! Codigo: " iProxID VIEW-AS ALERT-BOX INFORMATION.
     
-    ASSIGN lModoEdicao = FALSE.
-    RUN habilita_campos.
-    RUN enable_fClientes.
+    RUN limparCamposClientes.
+    OPEN QUERY qClientes FOR EACH Cliente NO-LOCK.
 END PROCEDURE.
 
 PROCEDURE busca_cep:

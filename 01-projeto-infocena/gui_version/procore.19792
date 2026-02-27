@@ -1,0 +1,11 @@
+
+27/02/26 14:58:19  [19792]
+Progress Recent Message(s):
+  
+
+  *** ABL Call Stack ***
+Last action: HIDE FRAME     (4)
+5350: prodict/dump/_lodsddl.p (prodict/dump/_lodsddl.r)
+1143: prodict/dump/_load_df.p (prodict/dump/_load_df.r)
+99: prodict/load_df.p (prodict/load_df.r)
+13: load_df_script.p (.\load_df_script.p)

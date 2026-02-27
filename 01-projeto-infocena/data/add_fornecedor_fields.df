@@ -1,0 +1,36 @@
+ADD FIELD "Numero" OF "Fornecedor" AS character 
+  FORMAT "x(10)"
+  INITIAL ""
+  LABEL "Numero"
+  POSITION 12
+  MAX-WIDTH 20
+  ORDER 120
+
+ADD FIELD "Complemento" OF "Fornecedor" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Complemento"
+  POSITION 13
+  MAX-WIDTH 80
+  ORDER 130
+
+ADD FIELD "Bairro" OF "Fornecedor" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Bairro"
+  POSITION 14
+  MAX-WIDTH 80
+  ORDER 140
+
+ADD FIELD "PontoReferencia" OF "Fornecedor" AS character 
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Ponto de Referencia"
+  POSITION 15
+  MAX-WIDTH 200
+  ORDER 150
+.
+PSC
+cpstream=1252
+.
+0000000800

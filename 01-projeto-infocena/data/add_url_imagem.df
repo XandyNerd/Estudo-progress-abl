@@ -1,0 +1,12 @@
+ADD FIELD "URL_Imagem" OF "Produto" AS character 
+  FORMAT "x(256)"
+  INITIAL ""
+  LABEL "URL Imagem"
+  POSITION 13
+  MAX-WIDTH 512
+  ORDER 120
+.
+PSC
+cpstream=1252
+.
+0000000300
