@@ -20,6 +20,7 @@
 tables.txt
 fields.txt
 fields_check.txt
+tmp/
 
 # Progress Temporary files
 lbi*
@@ -29,3 +30,4 @@ rcd*
 pica*
 *.tmp
 api_*_res.json
+PROMSGS
