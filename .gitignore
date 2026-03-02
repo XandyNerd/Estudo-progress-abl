@@ -1,28 +1,30 @@
-# Progress OpenEdge compiled files
-*.r
-
-# Log files
-*.log
-build.log
-
-# Temporary and backup files
-*.bak
-*~
-*.tmp
-*.swp
-
-# Progress database files (if needed, otherwise remove)
+# Database files
 *.db
-*.d1
-*.d2
+*.b1
+*.b2
+*.d
 *.lg
-*.lic
-*.lk
+*.lock
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# OpenEdge temporary/error files
+procore.*
+*.e
+*.ped
+*.dbg
+debug.list
+*.xref
 
-# User specific `.env` or configurations
-.env
-.env.local
+# Script logs and outputs
+*_stdout.txt
+load_log.txt
+load_result.txt
+load_result.txt
+*.log
+
+# VS Code / IDE
+.project
+.settings/
+.buildpath/
+
+# Temporary files
+/tmp/
