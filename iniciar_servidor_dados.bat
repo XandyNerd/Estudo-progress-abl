@@ -4,7 +4,7 @@ set PATH=%DLC%\bin;%PATH%
 cd /d "%~dp001-projeto-infocena\data"
 
 echo Iniciando Servidor de Dados Infocena (Porta 5555)...
-proserve infocena.db -S 5555 -H localhost -N TCP
+proserve infocena.db -S 5555 -H 0.0.0.0 -N TCP
 
 if %errorlevel% neq 0 (
     echo.
