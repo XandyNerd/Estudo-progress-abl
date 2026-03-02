@@ -69,6 +69,51 @@ DEFINE VARIABLE lAtivo     AS LOGICAL   INITIAL YES NO-UNDO.
 DEFINE VARIABLE cURLImagem AS CHARACTER FORMAT "X(256)" NO-UNDO.
 DEFINE VARIABLE cLimiteAPI AS CHARACTER FORMAT "X(30)" NO-UNDO.
 
+/* Variáveis Pedido de Compra */
+DEFINE VARIABLE iNumPedido     AS INTEGER   FORMAT ">>>>>>>9" NO-UNDO.
+DEFINE VARIABLE cStatusPedido  AS CHARACTER FORMAT "X(20)"    NO-UNDO.
+DEFINE VARIABLE dDataPedido    AS DATE      FORMAT "99/99/9999" NO-UNDO.
+DEFINE VARIABLE iFornePedido   AS INTEGER   FORMAT ">>>>>>>9" NO-UNDO.
+DEFINE VARIABLE cNomeFornePed  AS CHARACTER FORMAT "X(60)"    NO-UNDO.
+DEFINE VARIABLE cCondPagto     AS CHARACTER FORMAT "X(40)"    NO-UNDO.
+DEFINE VARIABLE dTotalPedido   AS DECIMAL   FORMAT "->>>,>>>,>>9.99" NO-UNDO.
+DEFINE VARIABLE cCompradorPed  AS CHARACTER FORMAT "X(40)"    NO-UNDO.
+
+/* Variáveis Lançamento de Itens */
+DEFINE VARIABLE iBuscaProd     AS INTEGER   FORMAT ">>>>>>>9" NO-UNDO.
+DEFINE VARIABLE cDescProd      AS CHARACTER FORMAT "X(60)"    NO-UNDO.
+DEFINE VARIABLE dItemQtd       AS DECIMAL   FORMAT "->>>,>>9.99" NO-UNDO.
+DEFINE VARIABLE dItemPreco     AS DECIMAL   FORMAT "->>>,>>9.99" NO-UNDO.
+
+/* Variáveis de Inteligência (Fase C) */
+DEFINE VARIABLE cAlertaEstoque  AS CHARACTER FORMAT "X(40)"    NO-UNDO LABEL "".
+DEFINE VARIABLE cVariacaoPreco  AS CHARACTER FORMAT "X(40)"    NO-UNDO LABEL "".
+DEFINE VARIABLE lSincronizar    AS LOGICAL   INITIAL YES       NO-UNDO LABEL "Sincronizar Custo no Cadastro".
+DEFINE VARIABLE dPrecoOrigProd  AS DECIMAL   NO-UNDO.
+
+/* Tabela Temporária de Itens do Pedido */
+DEFINE TEMP-TABLE ttItensPedido NO-UNDO
+    FIELD Id_Pedido  AS INTEGER
+    FIELD Sequencia  AS INTEGER
+    FIELD Id_Produto AS INTEGER
+    FIELD Descricao  AS CHARACTER FORMAT "X(40)"
+    FIELD Quantidade AS DECIMAL   FORMAT "->>>,>>9.99"
+    FIELD Preco_Unit AS DECIMAL   FORMAT "->>>,>>9.99"
+    FIELD Total_Item AS DECIMAL   FORMAT "->>>,>>>,>>9.99"
+    INDEX idx_seq IS PRIMARY Id_Pedido Sequencia.
+
+/* Tabela Temporária de Itens do NFe Importado */
+DEFINE TEMP-TABLE ttItensNFe NO-UNDO
+    FIELD Sequencia    AS INTEGER
+    FIELD Id_Produto   AS INTEGER
+    FIELD Descricao    AS CHARACTER FORMAT "X(40)"
+    FIELD Quantidade   AS DECIMAL   FORMAT "->>>,>>9.99"
+    FIELD ValorUnitario AS DECIMAL   FORMAT "->>,>>9.99"
+    FIELD ValorTotal   AS DECIMAL   FORMAT "->>>,>>>,>>9.99"
+    INDEX idx_seq_nfe IS PRIMARY Sequencia.
+
+DEFINE QUERY qItensNFe FOR ttItensNFe SCROLLING.
+
 DEFINE VARIABLE lEmEdicao    AS LOGICAL   INITIAL NO NO-UNDO.
 
 DEFINE BUTTON btnSalvarProd    LABEL "Salvar"   SIZE 15 BY 1.5.
@@ -82,27 +127,63 @@ DEFINE BUTTON btnConsultarAPI   LABEL "Consultar API" SIZE 18 BY 1.1.
 DEFINE IMAGE imgProduto         SIZE 18 BY 4 STRETCH-TO-FIT.
 DEFINE RECTANGLE rectFotoProd   SIZE 20 BY 5 BGCOLOR 15.
 
-DEFINE RECTANGLE rectDadosProd  SIZE 124 BY 5.5.
-DEFINE RECTANGLE rectValProd    SIZE 60  BY 5.
-DEFINE RECTANGLE rectFiscProd   SIZE 60  BY 5.
-DEFINE RECTANGLE RectTopoProd   SIZE 130 BY 4.5 BGCOLOR 1 FGCOLOR 15.
+DEFINE RECTANGLE rectDadosProd  SIZE 144 BY 5.5.
+DEFINE RECTANGLE rectValProd    SIZE 71  BY 5.
+DEFINE RECTANGLE rectFiscProd   SIZE 71  BY 5.
+DEFINE RECTANGLE RectTopoProd   SIZE 150 BY 4.5 BGCOLOR 1 FGCOLOR 15.
 
 DEFINE RECTANGLE rectDadosForne SIZE 124 BY 5.5.
 DEFINE RECTANGLE rectEndForne   SIZE 124 BY 5.
 DEFINE RECTANGLE RectTopoForne  SIZE 200 BY 4.5 BGCOLOR 1 FGCOLOR 15.
 
+/* Objetos Pedido de Compra */
+DEFINE BUTTON btnBuscaForne LABEL "Buscar" SIZE 12 BY 1.
+DEFINE BUTTON btnNovoPed     LABEL "Novo Pedido" SIZE 18 BY 1.5.
+DEFINE BUTTON btnSalvarPed   LABEL "Salvar"      SIZE 18 BY 1.5.
+DEFINE BUTTON btnVoltarPed   LABEL "Voltar"      SIZE 18 BY 1.5.
+
+DEFINE RECTANGLE RectTopoCompras SIZE 130 BY 4 BGCOLOR 1 FGCOLOR 15.
+DEFINE RECTANGLE rectCabecalhoPed SIZE 122 BY 8.
+DEFINE RECTANGLE rectItensPed     SIZE 122 BY 14.
+
+DEFINE BUTTON btnAdicItem LABEL "Adicionar Item" SIZE 20 BY 1.2.
+DEFINE BUTTON btnRemItem  LABEL "Remover Item"   SIZE 20 BY 1.2.
+
+/* Queries devem ser definidas antes dos Browses */
 DEFINE QUERY qProdutos FOR Produto SCROLLING.
+DEFINE QUERY qItensPedido FOR ttItensPedido SCROLLING.
+
+DEFINE BROWSE brItensPedido
+    QUERY qItensPedido
+    DISPLAY ttItensPedido.Sequencia COLUMN-LABEL "Seq"
+            ttItensPedido.Id_Produto COLUMN-LABEL "Cod"
+            ttItensPedido.Descricao  COLUMN-LABEL "Descricao"
+            ttItensPedido.Quantidade COLUMN-LABEL "Qtd"
+            ttItensPedido.Preco_Unit COLUMN-LABEL "Preco Unit"
+            ttItensPedido.Total_Item COLUMN-LABEL "Total Item"
+    WITH 10 DOWN NO-LABELS SIZE 114 BY 6 FIT-LAST-COLUMN.
+
+DEFINE BROWSE brItensNFe QUERY qItensNFe
+    DISPLAY ttItensNFe.Sequencia COLUMN-LABEL "Seq"
+            ttItensNFe.Id_Produto COLUMN-LABEL "Cod"
+            ttItensNFe.Descricao FORMAT "X(40)" COLUMN-LABEL "Produto"
+            ttItensNFe.Quantidade COLUMN-LABEL "Qtd"
+            ttItensNFe.ValorUnitario COLUMN-LABEL "Vl Unit"
+            ttItensNFe.ValorTotal COLUMN-LABEL "Vl Total"
+    WITH 10 DOWN NO-LABELS SIZE 114 BY 8 FIT-LAST-COLUMN.
+
 DEFINE BROWSE brProdutos QUERY qProdutos
        DISPLAY Produto.Id_Produto FORMAT "->>>,>>9" LABEL "ID"
                Produto.Descricao  FORMAT "X(40)"      LABEL "Descricao"
                Produto.Marca      FORMAT "X(20)"      LABEL "Marca"
                Produto.Unidade    FORMAT "X(3)"       LABEL "UN"
+               Produto.Preco_Custo FORMAT "->>,>>9.99" LABEL "Pr. Custo"
                Produto.Preco_Venda FORMAT "->>,>>9.99" LABEL "Pr. Venda"
                Produto.NCM        FORMAT "X(8)"       LABEL "NCM"
                Produto.CEST       FORMAT "X(7)"       LABEL "CEST"
                Produto.Estoque_Minimo FORMAT "->>,>>9.99" LABEL "Est. Min"
                Produto.Ativo      FORMAT "Sim/Nao"    LABEL "Ativo"
-       WITH NO-ROW-MARKERS SEPARATORS SIZE 124 BY 8 FIT-LAST-COLUMN.
+       WITH NO-ROW-MARKERS SEPARATORS SIZE 144 BY 8 FIT-LAST-COLUMN.
 
 /* Menu de Contexto para a Browse de Produtos */
 DEFINE MENU mPopupProd
@@ -150,6 +231,21 @@ DEFINE BUTTON btn-voltar
      LABEL "Voltar" 
      SIZE 15 BY 1.52.
 
+/* Variaveis e Botoes Nota Fiscal */
+DEFINE VARIABLE cChaveAcesso    AS CHARACTER FORMAT "X(44)" NO-UNDO.
+DEFINE VARIABLE cNumeroNF       AS CHARACTER FORMAT "X(10)" NO-UNDO.
+DEFINE VARIABLE cNomeFornecedor AS CHARACTER FORMAT "X(40)" NO-UNDO.
+DEFINE VARIABLE dTotalNFe       AS DECIMAL   FORMAT "->>,>>9.99" NO-UNDO.
+DEFINE VARIABLE tVincPedido     AS INTEGER NO-UNDO.
+
+DEFINE BUTTON btnImportarXML LABEL "1. Importar XML" SIZE 20 BY 1.5.
+DEFINE BUTTON btnVincularPed LABEL "2. Ligar Pedido" SIZE 15 BY 1.
+DEFINE BUTTON btnEfetivarNFe LABEL "3. EFETIVAR NF" SIZE 20 BY 2 BGCOLOR 10 FGCOLOR 15 FONT 6.
+DEFINE BUTTON btnVoltarNFe   LABEL "Voltar" SIZE 15 BY 1.5.
+
+DEFINE RECTANGLE rectCabecalhoNFe SIZE 122 BY 6.
+DEFINE RECTANGLE rectItensNFe   SIZE 122 BY 12.
+
 DEFINE IMAGE LogoInfocena
      FILENAME "..\LogoInfocena.jpg":U
      STRETCH-TO-FIT
@@ -181,42 +277,71 @@ DEFINE MENU mPopupForne
 DEFINE FRAME fProdutos
     RectTopoProd    AT ROW 1 COL 1
     "MODULO SUPRIMENTOS - CADASTRO DE PRODUTOS" VIEW-AS TEXT
-      SIZE 60 BY 1 AT ROW 2.5 COL 42.5 FONT 6 BGCOLOR 1 FGCOLOR 15
+      SIZE 60 BY 1 AT ROW 2.5 COL 52.5 FONT 6 BGCOLOR 1 FGCOLOR 15
 
     brProdutos      AT ROW 5 COL 3
     
     "DADOS GERAIS"  AT ROW 13.5 COL 5 FONT 6
     rectDadosProd   AT ROW 14 COL 3
-    cDescricao      AT ROW 15.0 COL 15 COLON-ALIGNED LABEL "Descricao" VIEW-AS FILL-IN SIZE 45 BY 1
+    cDescricao      AT ROW 15.0 COL 15 COLON-ALIGNED LABEL "Descricao" VIEW-AS FILL-IN SIZE 65 BY 1
     cUnidade        AT ROW 16.5 COL 15 COLON-ALIGNED LABEL "Unidade"
-    cCodBarras      AT ROW 16.5 COL 60 COLON-ALIGNED LABEL "Cod. Barras"
+    cCodBarras      AT ROW 16.5 COL 65 COLON-ALIGNED LABEL "Cod. Barras"
     
     "VALORES"       AT ROW 19.5 COL 5 FONT 6
     rectValProd     AT ROW 20.0 COL 3
     dPrecoCusto     AT ROW 21.5 COL 15 COLON-ALIGNED LABEL "Custo (R$)"
     dPrecoVenda     AT ROW 23.0 COL 15 COLON-ALIGNED LABEL "Venda (R$)"
     
-    "FISCAL"        AT ROW 19.5 COL 67 FONT 6
-    rectFiscProd    AT ROW 20.0 COL 65
-    cNCM            AT ROW 21.5 COL 75 COLON-ALIGNED LABEL "NCM"
-    cCEST           AT ROW 23.0 COL 75 COLON-ALIGNED LABEL "CEST"
+    "FISCAL"        AT ROW 19.5 COL 78 FONT 6
+    rectFiscProd    AT ROW 20.0 COL 76
+    cNCM            AT ROW 21.5 COL 86 COLON-ALIGNED LABEL "NCM"
+    cCEST           AT ROW 23.0 COL 86 COLON-ALIGNED LABEL "CEST"
     
-    cMarca          AT ROW 15.0 COL 72 COLON-ALIGNED LABEL "Marca" VIEW-AS FILL-IN SIZE 20 BY 1
-    dEstoqueMin     AT ROW 21.5 COL 105 COLON-ALIGNED LABEL "Est. Min"
-    lAtivo          AT ROW 23.0 COL 105 COLON-ALIGNED LABEL "Ativo" VIEW-AS TOGGLE-BOX
+    cMarca          AT ROW 15.0 COL 90 COLON-ALIGNED LABEL "Marca" VIEW-AS FILL-IN SIZE 20 BY 1
+    dEstoqueMin     AT ROW 21.5 COL 116 COLON-ALIGNED LABEL "Est. Min"
+    lAtivo          AT ROW 23.0 COL 116 COLON-ALIGNED LABEL "Ativo" VIEW-AS TOGGLE-BOX
     
-    btnConsultarAPI AT ROW 16.5 COL 78
-    cLimiteAPI      AT ROW 18.0 COL 62 NO-LABEL
-    rectFotoProd    AT ROW 14.2 COL 103
-    imgProduto      AT ROW 14.7 COL 104
+    btnConsultarAPI AT ROW 16.5 COL 95
+    cLimiteAPI      AT ROW 18.0 COL 85 NO-LABEL
+    rectFotoProd    AT ROW 14.2 COL 123
+    imgProduto      AT ROW 14.7 COL 124
 
     btnSalvarProd   AT ROW 25.5 COL 5
-    btnVoltarProd   AT ROW 25.5 COL 110
+    btnVoltarProd   AT ROW 25.5 COL 130
 
     WITH 1 DOWN NO-BOX OVERLAY THREE-D 
          SIDE-LABELS NO-UNDERLINE
          AT COLUMN 1 ROW 1
-         SIZE 130 BY 28.
+         SIZE 150 BY 28.
+
+/* Frame de Entrada de NFe */
+DEFINE FRAME fNFeEntrada
+    RectTopoCompras AT ROW 1.5 COL 1
+    "MODULO SUPRIMENTOS - ENTRADA DE NOTA FISCAL" VIEW-AS TEXT
+      SIZE 70 BY 1 AT ROW 3.0 COL 30 FONT 6 BGCOLOR 1 FGCOLOR 15
+
+    "DADOS DA NFe (IMPORTADOS)" AT ROW 7.0 COL 7 FONT 6
+    rectCabecalhoNFe AT ROW 7.5 COL 4
+    
+    cChaveAcesso AT ROW 8.5 COL 18 COLON-ALIGNED LABEL "Chave Acesso" VIEW-AS FILL-IN SIZE 50 BY 1
+    cNumeroNF    AT ROW 10.0 COL 18 COLON-ALIGNED LABEL "Numero NF" VIEW-AS FILL-IN SIZE 15 BY 1
+    cNomeFornecedor AT ROW 10.0 COL 55 COLON-ALIGNED LABEL "Fornecedor" VIEW-AS FILL-IN SIZE 40 BY 1
+    dTotalNFe    AT ROW 11.5 COL 18 COLON-ALIGNED LABEL "Total NFe (R$)" FORMAT "->>,>>9.99" VIEW-AS FILL-IN SIZE 15 BY 1
+    
+    btnImportarXML AT ROW 10.0 COL 100
+
+    "ITENS DA NOTA FISCAL" AT ROW 14.5 COL 7 FONT 6
+    rectItensNFe AT ROW 15.0 COL 4
+    
+    brItensNFe AT ROW 16.0 COL 8
+    
+    tVincPedido AT ROW 29.0 COL 18 COLON-ALIGNED LABEL "Nº Pedido Compra" VIEW-AS FILL-IN SIZE 12 BY 1
+    btnVincularPed AT ROW 29.0 COL 35
+    
+    btnVoltarNFe   AT ROW 31.8 COL 6
+    btnEfetivarNFe AT ROW 31.0 COL 100
+
+    WITH 1 DOWN NO-BOX OVERLAY THREE-D SIDE-LABELS NO-UNDERLINE AT COLUMN 1 ROW 1 SIZE 130 BY 34.
 
 /* Frame Vazio de Estoque */
 DEFINE FRAME fEstoque
@@ -224,17 +349,55 @@ DEFINE FRAME fEstoque
     WITH 1 DOWN NO-BOX OVERLAY THREE-D 
          SIZE 120 BY 25.
 
-/* Frame Vazio de Compras */
+/* Frame de Compras */
 DEFINE FRAME fCompras
-    "EM BREVE - COMPRAS" VIEW-AS TEXT AT ROW 5 COL 5
-    WITH 1 DOWN NO-BOX OVERLAY THREE-D 
-         SIZE 120 BY 25.
+    RectTopoCompras AT ROW 1.5 COL 1
+    "MODULO SUPRIMENTOS - PEDIDO DE COMPRA" VIEW-AS TEXT
+      SIZE 60 BY 1 AT ROW 3.0 COL 35 FONT 6 BGCOLOR 1 FGCOLOR 15
 
-/* Frame Vazio de Entradas NFe */
-DEFINE FRAME fNFeEntrada
-    "EM BREVE - ENTRADA DE NOTAS FISCAIS" VIEW-AS TEXT AT ROW 5 COL 5
+    "CABECALHO DO PEDIDO" AT ROW 7.0 COL 7 FONT 6
+    rectCabecalhoPed AT ROW 7.5 COL 4
+    
+    iNumPedido     AT ROW 9.0 COL 18 COLON-ALIGNED LABEL "Numero"       VIEW-AS FILL-IN SIZE 12 BY 1
+    dDataPedido    AT ROW 9.0 COL 52 COLON-ALIGNED LABEL "Data"         VIEW-AS FILL-IN SIZE 16 BY 1
+    cStatusPedido  AT ROW 9.0 COL 90 COLON-ALIGNED LABEL "Status"       VIEW-AS COMBO-BOX 
+                   LIST-ITEMS "ABERTO","FINALIZADO","CANCELADO" SIZE 20 BY 1
+    
+    iFornePedido   AT ROW 11.0 COL 18 COLON-ALIGNED LABEL "Fornecedor"  VIEW-AS FILL-IN SIZE 10 BY 1
+    cNomeFornePed  AT ROW 11.0 COL 30 NO-LABEL VIEW-AS FILL-IN SIZE 65 BY 1
+    btnBuscaForne  AT ROW 11.0 COL 97 
+    
+    cCondPagto     AT ROW 13.0 COL 18 COLON-ALIGNED LABEL "Cond. Pagto" VIEW-AS COMBO-BOX
+                   LIST-ITEMS "A VISTA","30 DIAS","30/60 DIAS","BOLETO","PIX" SIZE 25 BY 1
+    dTotalPedido   AT ROW 13.0 COL 85 COLON-ALIGNED LABEL "Total Pedido" VIEW-AS FILL-IN SIZE 20 BY 1
+    
+    "LANCAMENTO DE ITENS" AT ROW 16.5 COL 7 FONT 6
+    rectItensPed   AT ROW 17.0 COL 4
+    
+    iBuscaProd     AT ROW 18.5 COL 12 COLON-ALIGNED LABEL "Produto"       VIEW-AS FILL-IN SIZE 12 BY 1
+    cDescProd      AT ROW 18.5 COL 27 NO-LABEL VIEW-AS FILL-IN SIZE 40 BY 1
+    dItemQtd       AT ROW 18.5 COL 75 COLON-ALIGNED LABEL "Qtd"           VIEW-AS FILL-IN SIZE 10 BY 1
+    dItemPreco     AT ROW 18.5 COL 95 COLON-ALIGNED LABEL "Preco"        VIEW-AS FILL-IN SIZE 12 BY 1
+    
+    cAlertaEstoque AT ROW 19.8 COL 12 NO-LABEL VIEW-AS FILL-IN SIZE 40 BY 1 FONT 6 FGCOLOR 12
+    cVariacaoPreco AT ROW 19.8 COL 95 NO-LABEL VIEW-AS FILL-IN SIZE 30 BY 1 FONT 6 FGCOLOR 1
+    
+    lSincronizar   AT ROW 20.0 COL 60 VIEW-AS TOGGLE-BOX
+    
+    btnAdicItem    AT ROW 21.0 COL 15
+    btnRemItem     AT ROW 21.0 COL 37
+    
+    brItensPedido  AT ROW 23.5 COL 8
+    
+    btnNovoPed     AT ROW 31.8 COL 30 
+    btnSalvarPed   AT ROW 31.8 COL 52 
+    btnVoltarPed   AT ROW 31.8 COL 74 
+    
     WITH 1 DOWN NO-BOX OVERLAY THREE-D 
-         SIZE 120 BY 25.
+         SIDE-LABELS NO-UNDERLINE
+         AT COLUMN 1 ROW 1
+         SIZE 130 BY 34. /* Reduzido de 36 para 34 */
+
 
 /* Frame de Fornecedores */
 DEFINE FRAME fFornecedores
@@ -737,9 +900,324 @@ ON CHOOSE OF btn-compras IN FRAME fMain /* COMPRAS */
 DO:
   HIDE FRAME fMain.
   VIEW FRAME fCompras.
+  ENABLE btnNovoPed btnVoltarPed WITH FRAME fCompras.
   ASSIGN FRAME fCompras:X = (C-Win:WIDTH-PIXELS - FRAME fCompras:WIDTH-PIXELS) / 2
          FRAME fCompras:Y = (C-Win:HEIGHT-PIXELS - FRAME fCompras:HEIGHT-PIXELS) / 2 NO-ERROR.
+  RUN carregarItensVazios. /* Prepara a grade futura */
 END.
+
+ON CHOOSE OF btnVoltarPed IN FRAME fCompras DO:
+    HIDE FRAME fCompras.
+    VIEW FRAME fMain.
+END.
+
+ON CHOOSE OF btnNovoPed IN FRAME fCompras DO:
+    RUN novoPedido.
+END.
+
+PROCEDURE novoPedido:
+    DEFINE VARIABLE cMsg AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE dPreco AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstMin AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstAtu AS DECIMAL NO-UNDO.
+    
+    RUN compras_logica.p (INPUT "PROXIMO_ID", 
+                          INPUT 0, 
+                          INPUT 0, 
+                          INPUT ?, 
+                          INPUT "", 
+                          INPUT "", 
+                          INPUT "", 
+                          INPUT 0, /* Total */
+                          INPUT 0, /* Qtd */
+                          INPUT 0, /* Preco */
+                          OUTPUT iNumPedido, 
+                          OUTPUT cNomeFornePed, 
+                          OUTPUT dPreco,
+                          OUTPUT dEstMin,
+                          OUTPUT dEstAtu,
+                          OUTPUT cMsg).
+    
+    EMPTY TEMP-TABLE ttItensPedido.
+    OPEN QUERY qItensPedido FOR EACH ttItensPedido.
+    
+    ASSIGN dDataPedido = TODAY
+           cStatusPedido = "ABERTO"
+           iFornePedido = 0
+           cNomeFornePed = ""
+           cCondPagto = "A VISTA"
+           dTotalPedido = 0
+           iBuscaProd = 0
+           cDescProd = ""
+           dItemQtd = 0
+           dItemPreco = 0
+           cAlertaEstoque = ""
+           cVariacaoPreco = ""
+           lSincronizar = YES.
+           
+    DISPLAY iNumPedido dDataPedido cStatusPedido iFornePedido cNomeFornePed cCondPagto dTotalPedido 
+            iBuscaProd cDescProd dItemQtd dItemPreco cAlertaEstoque cVariacaoPreco lSincronizar WITH FRAME fCompras.
+            
+    ENABLE iFornePedido btnBuscaForne cStatusPedido cCondPagto 
+           iBuscaProd dItemQtd dItemPreco lSincronizar btnAdicItem btnRemItem brItensPedido
+           btnSalvarPed btnVoltarPed WITH FRAME fCompras.
+END PROCEDURE.
+
+PROCEDURE carregarItensVazios:
+    /* Placeholder para a Fase B */
+END PROCEDURE.
+
+ON LEAVE OF iFornePedido IN FRAME fCompras DO:
+    DEFINE VARIABLE cMsg AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iDummy AS INTEGER NO-UNDO.
+    DEFINE VARIABLE cNome  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE dPreco AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstMin AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstAtu AS DECIMAL NO-UNDO.
+
+    IF SELF:SCREEN-VALUE = "0" OR SELF:SCREEN-VALUE = "" THEN RETURN.
+    
+    RUN compras_logica.p (INPUT "BUSCAR_FORNECEDOR", 
+                          INPUT 0, 
+                          INPUT INTEGER(SELF:SCREEN-VALUE), 
+                          INPUT ?, 
+                          INPUT "", 
+                          INPUT "", 
+                          INPUT "", 
+                          INPUT 0, /* Total */
+                          INPUT 0, /* Qtd */
+                          INPUT 0, /* Preco */
+                          OUTPUT iDummy, 
+                          OUTPUT cNome, 
+                          OUTPUT dPreco,
+                          OUTPUT dEstMin,
+                          OUTPUT dEstAtu,
+                          OUTPUT cMsg).
+
+    IF cMsg = "SUCESSO" THEN 
+        cNomeFornePed:SCREEN-VALUE IN FRAME fCompras = cNome.
+    ELSE DO:
+        MESSAGE cMsg VIEW-AS ALERT-BOX ERROR.
+        cNomeFornePed:SCREEN-VALUE IN FRAME fCompras = "".
+    END.
+END.
+
+ON CHOOSE OF btnBuscaForne IN FRAME fCompras DO:
+    APPLY "LEAVE" TO iFornePedido IN FRAME fCompras.
+END.
+
+ON CHOOSE OF btnSalvarPed IN FRAME fCompras DO:
+    DEFINE VARIABLE cMsg AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iDummy AS INTEGER NO-UNDO.
+    DEFINE VARIABLE cDummy AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE dDummy AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstMin AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstAtu AS DECIMAL NO-UNDO.
+    
+    IF iFornePedido:SCREEN-VALUE IN FRAME fCompras = "0" OR iFornePedido:SCREEN-VALUE = "" THEN DO:
+        MESSAGE "Selecione um Fornecedor!" VIEW-AS ALERT-BOX ERROR.
+        RETURN.
+    END.
+
+    RUN compras_logica.p (INPUT "SALVAR_CABECALHO", 
+                          INPUT iNumPedido, 
+                          INPUT INTEGER(iFornePedido:SCREEN-VALUE IN FRAME fCompras), 
+                          INPUT DATE(dDataPedido:SCREEN-VALUE IN FRAME fCompras), 
+                          INPUT cStatusPedido:SCREEN-VALUE IN FRAME fCompras, 
+                          INPUT cCondPagto:SCREEN-VALUE IN FRAME fCompras, 
+                          INPUT "", /* Comprador - placeholder */
+                          INPUT DECIMAL(dTotalPedido:SCREEN-VALUE IN FRAME fCompras),
+                          INPUT 0, /* Qtd */
+                          INPUT 0, /* Preco */
+                          OUTPUT iDummy, 
+                          OUTPUT cDummy, 
+                          OUTPUT dDummy,
+                          OUTPUT dEstMin,
+                          OUTPUT dEstAtu,
+                          OUTPUT cMsg).
+                          
+    IF cMsg = "SUCESSO" THEN DO:
+        /* Salva cada item da grade no banco */
+        FOR EACH ttItensPedido:
+            RUN compras_logica.p (INPUT "SALVAR_ITEM",
+                                  INPUT ttItensPedido.Id_Pedido,
+                                  INPUT ttItensPedido.Id_Produto,
+                                  INPUT ?, 
+                                  INPUT "",
+                                  INPUT "",
+                                  INPUT "",
+                                  INPUT 0, 
+                                  INPUT ttItensPedido.Quantidade,
+                                  INPUT ttItensPedido.Preco_Unit,
+                                  OUTPUT iDummy,
+                                  OUTPUT cDummy,
+                                  OUTPUT dDummy,
+                                  OUTPUT dEstMin,
+                                  OUTPUT dEstAtu,
+                                  OUTPUT cMsg).
+            
+            /* Sincroniza custo no cadastro se marcado */
+            IF lSincronizar:CHECKED IN FRAME fCompras THEN DO:
+                RUN compras_logica.p (INPUT "SINCRONIZAR_CUSTO",
+                                      INPUT 0,
+                                      INPUT ttItensPedido.Id_Produto, /* id_produto */
+                                      INPUT ?,
+                                      INPUT "",
+                                      INPUT "",
+                                      INPUT "",
+                                      INPUT 0,
+                                      INPUT 0,
+                                      INPUT ttItensPedido.Preco_Unit,
+                                      OUTPUT iDummy,
+                                      OUTPUT cDummy,
+                                      OUTPUT dDummy,
+                                      OUTPUT dEstMin,
+                                      OUTPUT dEstAtu,
+                                      OUTPUT cMsg).
+            END.
+        END.
+        MESSAGE "Pedido e Itens Salvos com Sucesso!" VIEW-AS ALERT-BOX INFORMATION.
+    END.
+    ELSE
+        MESSAGE cMsg VIEW-AS ALERT-BOX ERROR.
+END.
+
+/* --- LOGICA DE ITENS (FASE B) --- */
+
+ON LEAVE OF iBuscaProd IN FRAME fCompras DO:
+    DEFINE VARIABLE cMsg   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iDummy AS INTEGER NO-UNDO.
+    DEFINE VARIABLE cNome  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE dPreco AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstMin AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dEstAtu AS DECIMAL NO-UNDO.
+
+    IF SELF:SCREEN-VALUE = "0" OR SELF:SCREEN-VALUE = "" THEN RETURN.
+
+    RUN compras_logica.p (INPUT "BUSCAR_PRODUTO",
+                          INPUT INTEGER(SELF:SCREEN-VALUE),
+                          INPUT 0,
+                          INPUT ?,
+                          INPUT "",
+                          INPUT "",
+                          INPUT "",
+                          INPUT 0, /* Total */
+                          INPUT 0, /* Qtd */
+                          INPUT 0, /* Preco */
+                          OUTPUT iDummy,
+                          OUTPUT cNome,
+                          OUTPUT dPreco,
+                          OUTPUT dEstMin,
+                          OUTPUT dEstAtu,
+                          OUTPUT cMsg).
+
+    IF cMsg = "SUCESSO" THEN DO:
+        cDescProd:SCREEN-VALUE IN FRAME fCompras = cNome.
+        dItemPreco:SCREEN-VALUE IN FRAME fCompras = STRING(dPreco).
+        dPrecoOrigProd = dPreco. /* Guarda o preco do cadastro */
+        
+        /* Inteligencia de Estoque */
+        IF dEstAtu < dEstMin THEN 
+            cAlertaEstoque:SCREEN-VALUE IN FRAME fCompras = "ALERTA: ESTOQUE BAIXO (" + STRING(dEstAtu) + ")".
+        ELSE
+            cAlertaEstoque:SCREEN-VALUE IN FRAME fCompras = "".
+            
+        APPLY "ENTRY" TO dItemQtd IN FRAME fCompras.
+    END.
+    ELSE DO:
+        MESSAGE cMsg VIEW-AS ALERT-BOX ERROR.
+        cDescProd:SCREEN-VALUE IN FRAME fCompras = "".
+        dItemPreco:SCREEN-VALUE IN FRAME fCompras = "0".
+        cAlertaEstoque:SCREEN-VALUE IN FRAME fCompras = "".
+        cVariacaoPreco:SCREEN-VALUE IN FRAME fCompras = "".
+        dPrecoOrigProd = 0.
+    END.
+END.
+
+ON VALUE-CHANGED OF dItemPreco IN FRAME fCompras DO:
+    DEFINE VARIABLE dDigitado AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dDiff     AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dPerc     AS DECIMAL NO-UNDO.
+    
+    IF dPrecoOrigProd = 0 OR SELF:SCREEN-VALUE = "" THEN RETURN.
+    
+    dDigitado = DECIMAL(SELF:SCREEN-VALUE).
+    
+    IF dDigitado = dPrecoOrigProd THEN DO:
+        cVariacaoPreco:SCREEN-VALUE IN FRAME fCompras = "".
+        RETURN.
+    END.
+    
+    /* Protecao contra divisao por zero se o produto ainda nao tem custo cadastrado */
+    IF dPrecoOrigProd = 0 THEN DO:
+        cVariacaoPreco:SCREEN-VALUE IN FRAME fCompras = "Novo Custo Base".
+        RETURN.
+    END.
+    
+    dDiff = dDigitado - dPrecoOrigProd.
+    dPerc = (dDiff / dPrecoOrigProd) * 100.
+    
+    IF dPerc > 0 THEN 
+        cVariacaoPreco:SCREEN-VALUE IN FRAME fCompras = "+" + STRING(dPerc, ">>>,>>9.99") + "% (Aumento)".
+    ELSE 
+        cVariacaoPreco:SCREEN-VALUE IN FRAME fCompras = STRING(dPerc, "->>>,>>9.99") + "% (Desconto)".
+END.
+
+
+ON CHOOSE OF btnAdicItem IN FRAME fCompras DO:
+    DEFINE VARIABLE iProxSeq AS INTEGER NO-UNDO.
+    
+    IF iBuscaProd:SCREEN-VALUE IN FRAME fCompras = "0" OR dItemQtd:SCREEN-VALUE = "0" THEN DO:
+        MESSAGE "Informe Produto e Quantidade!" VIEW-AS ALERT-BOX ERROR.
+        RETURN.
+    END.
+
+    IF cDescProd:SCREEN-VALUE IN FRAME fCompras = "" THEN DO:
+        MESSAGE "Busque um produto valido antes de adicionar!" VIEW-AS ALERT-BOX ERROR.
+        RETURN.
+    END.
+
+    FIND LAST ttItensPedido NO-LOCK NO-ERROR.
+    iProxSeq = (IF AVAILABLE ttItensPedido THEN ttItensPedido.Sequencia + 1 ELSE 1).
+
+    CREATE ttItensPedido.
+    ASSIGN ttItensPedido.Id_Pedido  = iNumPedido
+           ttItensPedido.Sequencia  = iProxSeq
+           ttItensPedido.Id_Produto = INTEGER(iBuscaProd:SCREEN-VALUE IN FRAME fCompras)
+           ttItensPedido.Descricao  = cDescProd:SCREEN-VALUE IN FRAME fCompras
+           ttItensPedido.Quantidade = DECIMAL(dItemQtd:SCREEN-VALUE IN FRAME fCompras)
+           ttItensPedido.Preco_Unit = DECIMAL(dItemPreco:SCREEN-VALUE IN FRAME fCompras)
+           ttItensPedido.Total_Item = ttItensPedido.Quantidade * ttItensPedido.Preco_Unit.
+
+    RUN atualizarTotalPedido.
+    
+    /* Limpa campos de lançamento */
+    ASSIGN iBuscaProd:SCREEN-VALUE = "0"
+           cDescProd:SCREEN-VALUE = ""
+           dItemQtd:SCREEN-VALUE = "0"
+           dItemPreco:SCREEN-VALUE = "0".
+           
+    OPEN QUERY qItensPedido FOR EACH ttItensPedido.
+    APPLY "ENTRY" TO iBuscaProd IN FRAME fCompras.
+END.
+
+ON CHOOSE OF btnRemItem IN FRAME fCompras DO:
+    IF NOT AVAILABLE ttItensPedido THEN RETURN.
+    
+    DELETE ttItensPedido.
+    RUN atualizarTotalPedido.
+    OPEN QUERY qItensPedido FOR EACH ttItensPedido.
+END.
+
+PROCEDURE atualizarTotalPedido:
+    DEFINE VARIABLE dTotal AS DECIMAL INITIAL 0 NO-UNDO.
+    
+    FOR EACH ttItensPedido:
+        dTotal = dTotal + ttItensPedido.Total_Item.
+    END.
+    
+    dTotalPedido:SCREEN-VALUE IN FRAME fCompras = STRING(dTotal).
+END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -1077,6 +1555,118 @@ DO:
   APPLY "WINDOW-CLOSE":U TO C-Win.
 END.
 
+ON CHOOSE OF btn-nfe IN FRAME fMain /* Abrir Modulo NFe */
+DO:
+    HIDE FRAME fMain.
+    VIEW FRAME fNFeEntrada.
+    ENABLE ALL EXCEPT cChaveAcesso cNumeroNF cNomeFornecedor dTotalNFe WITH FRAME fNFeEntrada.
+END.
+
+ON CHOOSE OF btnImportarXML IN FRAME fNFeEntrada /* Importar XML */
+DO:
+    DEFINE VARIABLE cCabecalho AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cMensagem  AS CHARACTER NO-UNDO.
+    
+    RUN nfe_logica.p (INPUT "LER_XML",
+                      INPUT "..\data\mock_nfe.xml",
+                      INPUT-OUTPUT TABLE ttItensNFe,
+                      OUTPUT cCabecalho,
+                      OUTPUT cMensagem).
+                      
+    IF cMensagem = "SUCESSO" THEN DO:
+        ASSIGN 
+            cChaveAcesso:SCREEN-VALUE IN FRAME fNFeEntrada    = ENTRY(1, cCabecalho, "|")
+            cNumeroNF:SCREEN-VALUE IN FRAME fNFeEntrada       = ENTRY(2, cCabecalho, "|")
+            cNomeFornecedor:SCREEN-VALUE IN FRAME fNFeEntrada = ENTRY(3, cCabecalho, "|")
+            dTotalNFe:SCREEN-VALUE IN FRAME fNFeEntrada       = ENTRY(4, cCabecalho, "|").
+            
+        OPEN QUERY qItensNFe FOR EACH ttItensNFe.
+        MESSAGE "XML importado com sucesso!" VIEW-AS ALERT-BOX INFORMATION.
+    END.
+    ELSE MESSAGE cMensagem VIEW-AS ALERT-BOX ERROR.
+END.
+
+ON CHOOSE OF btnVincularPed IN FRAME fNFeEntrada /* Two-Way Match */
+DO:
+    DEFINE VARIABLE cResultado AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cMsgMatch  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cPedStr    AS CHARACTER NO-UNDO.
+    
+    cPedStr = tVincPedido:SCREEN-VALUE IN FRAME fNFeEntrada.
+    
+    IF cPedStr = "" OR cPedStr = "0" OR cPedStr = ? THEN DO:
+        MESSAGE "Informe o numero do Pedido de Compra para vincular." VIEW-AS ALERT-BOX WARNING.
+        RETURN.
+    END.
+    
+    RUN nfe_logica.p (INPUT "COMPARAR_PEDIDO",
+                      INPUT cPedStr,
+                      INPUT-OUTPUT TABLE ttItensNFe,
+                      OUTPUT cResultado,
+                      OUTPUT cMsgMatch).
+                      
+    IF cMsgMatch = "SUCESSO" THEN
+        MESSAGE cResultado VIEW-AS ALERT-BOX INFORMATION TITLE "Conferimento NFe x Pedido".
+    ELSE
+        MESSAGE cMsgMatch VIEW-AS ALERT-BOX ERROR.
+END.
+
+ON CHOOSE OF btnEfetivarNFe IN FRAME fNFeEntrada /* Efetivar Recebimento */
+DO:
+    DEFINE VARIABLE cDadosEfet  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cRetEfet    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cMsgEfet    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lConfirma   AS LOGICAL   NO-UNDO.
+    
+    /* Valida que existe importacao */
+    IF cChaveAcesso:SCREEN-VALUE IN FRAME fNFeEntrada = "" THEN DO:
+        MESSAGE "Importe um XML antes de efetivar!" VIEW-AS ALERT-BOX WARNING.
+        RETURN.
+    END.
+    
+    /* Confirmacao do usuario */
+    MESSAGE "Tem certeza que deseja EFETIVAR esta Nota Fiscal?" + CHR(10)
+          + "Isso ira:" + CHR(10)
+          + "  - Gravar a NFe no banco de dados" + CHR(10)
+          + "  - Atualizar o estoque dos produtos" + CHR(10)
+          + "  - Gerar um titulo no Contas a Pagar"
+        VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lConfirma.
+    
+    IF NOT lConfirma THEN RETURN.
+    
+    /* Monta string de parametros: Chave|NumNF|Fornecedor|Total|IdPedido */
+    cDadosEfet = cChaveAcesso:SCREEN-VALUE IN FRAME fNFeEntrada + "|"
+               + cNumeroNF:SCREEN-VALUE IN FRAME fNFeEntrada + "|"
+               + cNomeFornecedor:SCREEN-VALUE IN FRAME fNFeEntrada + "|"
+               + dTotalNFe:SCREEN-VALUE IN FRAME fNFeEntrada + "|"
+               + tVincPedido:SCREEN-VALUE IN FRAME fNFeEntrada.
+    
+    RUN nfe_logica.p (INPUT "EFETIVAR",
+                      INPUT cDadosEfet,
+                      INPUT-OUTPUT TABLE ttItensNFe,
+                      OUTPUT cRetEfet,
+                      OUTPUT cMsgEfet).
+    
+    IF cMsgEfet = "SUCESSO" THEN DO:
+        MESSAGE cRetEfet VIEW-AS ALERT-BOX INFORMATION TITLE "Recebimento Efetivado!".
+        /* Limpa a tela apos sucesso */
+        ASSIGN cChaveAcesso:SCREEN-VALUE IN FRAME fNFeEntrada    = ""
+               cNumeroNF:SCREEN-VALUE IN FRAME fNFeEntrada       = ""
+               cNomeFornecedor:SCREEN-VALUE IN FRAME fNFeEntrada = ""
+               dTotalNFe:SCREEN-VALUE IN FRAME fNFeEntrada       = ""
+               tVincPedido:SCREEN-VALUE IN FRAME fNFeEntrada     = "0".
+        EMPTY TEMP-TABLE ttItensNFe.
+        OPEN QUERY qItensNFe FOR EACH ttItensNFe.
+    END.
+    ELSE MESSAGE cMsgEfet VIEW-AS ALERT-BOX ERROR.
+END.
+
+ON CHOOSE OF btnVoltarNFe IN FRAME fNFeEntrada /* Voltar para Menu */
+DO:
+    HIDE FRAME fNFeEntrada.
+    VIEW FRAME fMain.
+END.
+
 /* Gatilho btnVoltarProd consolidado acima para suportar modo dinamico */
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1133,6 +1723,10 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
   IF VALID-HANDLE(FRAME fFornecedores:HANDLE) THEN
       ASSIGN FRAME fFornecedores:X = (C-Win:WIDTH-PIXELS - FRAME fFornecedores:WIDTH-PIXELS) / 2
              FRAME fFornecedores:Y = (C-Win:HEIGHT-PIXELS - FRAME fFornecedores:HEIGHT-PIXELS) / 2.
+
+  IF VALID-HANDLE(FRAME fNFeEntrada:HANDLE) THEN
+      ASSIGN FRAME fNFeEntrada:X = (C-Win:WIDTH-PIXELS - FRAME fNFeEntrada:WIDTH-PIXELS) / 2
+             FRAME fNFeEntrada:Y = (C-Win:HEIGHT-PIXELS - FRAME fNFeEntrada:HEIGHT-PIXELS) / 2.
 
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.

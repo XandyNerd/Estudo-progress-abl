@@ -1,4 +1,14 @@
 {
-    "abl.configuration.binDir": "C:\\Progress\\OpenEdge\\bin",
-    "abl.configuration.dlc": "C:\\Progress\\OpenEdge"
+    "openedge.dlc": "C:\\Progress\\OpenEdge",
+    "openedge.propath": [
+        "${workspaceFolder}/01-projeto-infocena/gui_version",
+        "${workspaceFolder}/01-projeto-infocena/data"
+    ],
+    "openedge.runtimes": [
+        {
+            "name": "12.8",
+            "path": "C:\\Progress\\OpenEdge",
+            "version": "12.8"
+        }
+    ]
 }

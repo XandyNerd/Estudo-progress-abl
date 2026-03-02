@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Infocena ERP (ABL)",
+            "type": "abl",
+            "request": "launch",
+            "program": "interface_login.w",
+            "cwd": "${workspaceFolder}/01-projeto-infocena/gui_version"
+        }
+    ]
+}

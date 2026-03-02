@@ -10,7 +10,10 @@
                 "INI",
                 "-db",
                 "..\\data\\infocena.db",
-                "-1",
+                "-H",
+                "localhost",
+                "-S",
+                "5555",
                 "-p",
                 "${fileBasename}"
             ],
@@ -24,6 +27,17 @@
             "presentation": {
                 "reveal": "always",
                 "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Progress: Iniciar Servidor de Dados",
+            "type": "shell",
+            "command": ".\\iniciar_servidor_dados.bat",
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
             },
             "problemMatcher": []
         }

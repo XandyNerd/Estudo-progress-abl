@@ -1,0 +1,132 @@
+ADD TABLE "Produto"
+  AREA "Schema Area"
+  DUMP-NAME "produto"
+
+ADD FIELD "Id_Produto" OF "Produto" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "Descricao" OF "Produto" AS character 
+  FORMAT "X(100)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 200
+  ORDER 20
+
+ADD FIELD "Unidade" OF "Produto" AS character 
+  FORMAT "X(3)"
+  INITIAL "UN"
+  POSITION 4
+  MAX-WIDTH 6
+  ORDER 30
+
+ADD FIELD "NCM" OF "Produto" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "CEST" OF "Produto" AS character 
+  FORMAT "X(7)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 14
+  ORDER 50
+
+ADD FIELD "Preco_Custo" OF "Produto" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 60
+
+ADD FIELD "Preco_Venda" OF "Produto" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 70
+
+ADD FIELD "Cod_Barras" OF "Produto" AS character 
+  FORMAT "X(14)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 28
+  ORDER 80
+
+ADD FIELD "Marca" OF "Produto" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Marca"
+  POSITION 10
+  MAX-WIDTH 80
+  ORDER 90
+
+ADD FIELD "Estoque_Minimo" OF "Produto" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Estoque Min"
+  POSITION 11
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 100
+
+ADD FIELD "Ativo" OF "Produto" AS logical 
+  FORMAT "Ativo/Inativo"
+  INITIAL "yes"
+  LABEL "Ativo"
+  POSITION 12
+  MAX-WIDTH 1
+  ORDER 110
+
+ADD FIELD "URL_Imagem" OF "Produto" AS character 
+  FORMAT "x(256)"
+  INITIAL ""
+  LABEL "URL Imagem"
+  POSITION 13
+  MAX-WIDTH 512
+  ORDER 120
+
+ADD FIELD "Foto_Blob" OF "Produto" AS blob 
+  FORMAT "X(8)"
+  INITIAL ?
+  POSITION 14
+  LOB-AREA "Schema Area"
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
+  ORDER 131
+
+ADD FIELD "Quantidade_Estoque" OF "Produto" AS decimal 
+  FORMAT "->>>,>>9.99"
+  INITIAL "0"
+  LABEL "Saldo Doca"
+  POSITION 15
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 130
+
+ADD INDEX "idx_IdProduto" ON "Produto" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "Id_Produto" ASCENDING 
+
+ADD INDEX "idx_CodBarras" ON "Produto" 
+  AREA "Schema Area"
+  INDEX-FIELD "Cod_Barras" ASCENDING 
+
+ADD INDEX "idx_Descricao" ON "Produto" 
+  AREA "Schema Area"
+  INDEX-FIELD "Descricao" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000002408

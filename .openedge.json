@@ -1,0 +1,17 @@
+{
+    "workingDirectory": "${workspaceFolder}/01-projeto-infocena/gui_version",
+    "dlc": "C:/Progress/OpenEdge",
+    "proPath": [
+        "${workspaceFolder}/01-projeto-infocena/gui_version",
+        "${workspaceFolder}/01-projeto-infocena/data"
+    ],
+    "startupProcedure": "interface_login.w",
+    "dbConnections": [
+        {
+            "name": "infocena",
+            "dbName": "infocena",
+            "dbDir": "${workspaceFolder}/01-projeto-infocena/data",
+            "connectParameters": "-db infocena -S 5555 -H localhost"
+        }
+    ]
+}

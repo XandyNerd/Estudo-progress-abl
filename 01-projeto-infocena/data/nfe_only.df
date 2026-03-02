@@ -1,0 +1,154 @@
+ADD TABLE "NotaFiscal"
+  AREA "Schema Area"
+  DUMP-NAME "notafiscal"
+
+ADD FIELD "ChaveAcesso" OF "NotaFiscal" AS character 
+  FORMAT "x(44)"
+  INITIAL ""
+  LABEL "Chave Acesso NFe"
+  POSITION 2
+  MAX-WIDTH 88
+  ORDER 10
+
+ADD FIELD "NumeroNF" OF "NotaFiscal" AS integer 
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Numero da NFe"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "Serie" OF "NotaFiscal" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Serie"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "Id_Fornecedor" OF "NotaFiscal" AS integer 
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Cod Fornecedor"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "Id_PedidoCompra" OF "NotaFiscal" AS integer 
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Vinculo Pedido"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "DataEmissao" OF "NotaFiscal" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Emissao NF"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "DataEntrada" OF "NotaFiscal" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Entrada no Sistema"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "ValorTotal" OF "NotaFiscal" AS decimal 
+  FORMAT "->>>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Total da NFe"
+  POSITION 9
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 80
+
+ADD FIELD "StatusNFe" OF "NotaFiscal" AS character 
+  FORMAT "x(20)"
+  INITIAL "DIGITADA"
+  LABEL "Status Interno"
+  POSITION 10
+  MAX-WIDTH 40
+  ORDER 90
+
+ADD INDEX "idx_chave" ON "NotaFiscal" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ChaveAcesso" ASCENDING 
+
+ADD INDEX "idx_fornecedor" ON "NotaFiscal" 
+  AREA "Schema Area"
+  INDEX-FIELD "Id_Fornecedor" ASCENDING 
+
+ADD TABLE "ItemNotaFiscal"
+  AREA "Schema Area"
+  DUMP-NAME "itemnotafiscal"
+
+ADD FIELD "ChaveAcesso" OF "ItemNotaFiscal" AS character 
+  FORMAT "x(44)"
+  INITIAL ""
+  LABEL "Chave Acesso XML"
+  POSITION 2
+  MAX-WIDTH 88
+  ORDER 10
+
+ADD FIELD "Sequencia" OF "ItemNotaFiscal" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "ID Item XML"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "Id_Produto" OF "ItemNotaFiscal" AS integer 
+  FORMAT ">>>>>>>>9"
+  INITIAL "0"
+  LABEL "Cod Produto"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "Quantidade" OF "ItemNotaFiscal" AS decimal 
+  FORMAT "->>>,>>9.99"
+  INITIAL "0"
+  LABEL "Quantidade Entrou"
+  POSITION 5
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 40
+
+ADD FIELD "ValorUnitario" OF "ItemNotaFiscal" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Custo Unit XML"
+  POSITION 6
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 50
+
+ADD FIELD "ValorTotal" OF "ItemNotaFiscal" AS decimal 
+  FORMAT "->>>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Soma Item XML"
+  POSITION 7
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 60
+
+ADD INDEX "idx_itemnf" ON "ItemNotaFiscal" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ChaveAcesso" ASCENDING 
+  INDEX-FIELD "Sequencia" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000004901

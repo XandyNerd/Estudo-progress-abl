@@ -1,0 +1,8 @@
+ADD FIELD "Quantidade_Estoque" OF "Produto" AS decimal 
+  FORMAT "->>>,>>9.99"
+  INITIAL "0"
+  LABEL "Saldo Doca"
+  POSITION 15
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 130

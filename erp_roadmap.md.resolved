@@ -1,0 +1,63 @@
+# Mapa Estratégico - ERP Infocena (Simples & Ágil)
+
+Para um ERP ser considerado "simples" e eficiente, devemos focar nos pilares que fazem o dinheiro entrar, sair e ser controlado. Abaixo, a separação do que manteremos e o que ficará de fora para evitar complexidade desnecessária.
+
+## 🎯 Estrutura de Módulos Selecionados
+
+### 1. COMERCIAL (O Coração)
+*Foco: Vender e Gerenciar Clientes.*
+- **Manter**: Cadastro de Clientes (OK), **Pedidos de Venda**, **Faturamento NF-e/NFS-e**, **CRM Básico** (Histórico de contatos).
+- **Remover**: Previsão de Vendas, Exportação, Embarque (muito avançados).
+
+### 2. FINANÇAS (O Pulmão)
+*Foco: Controle do dinheiro.*
+- **Manter**: **Contas a Receber**, **Contas a Pagar**, **Fluxo de Caixa** (Básico), **Tesouraria** (Saldos bancários).
+- **Remover**: Câmbio, Investimentos, Operações de Vendor, Ativo Fixo.
+
+### 3. SUPRIMENTOS (A Base)
+*Foco: Estoque e Compras.*
+- **Manter**: **Gestão de Estoque**, **Compras**, **Entrada de Notas Fiscais**, Cadastro de Fornecedores.
+- **Remover**: Importação, Rastreamento de DF-e (deixar para o futuro).
+
+### 4. CONTROLADORIA (A Legalidade)
+*Foco: Impostos simples.*
+- **Manter**: **Obrigações Fiscais I (Simples Nacional)**, Integração Contábil Básica.
+- **Remover**: Cenários Tributários complexos, Auditoria Fiscal.
+
+### 5. TECNOLOGIA (O Suporte)
+- **Manter**: Segurança do Sistema (Login), Menu de Navegação, Gerador de Relatórios (Básico).
+
+---
+
+## 🚀 Passo a Passo: Roadmap de Desenvolvimento
+
+### Fase 1: Fundação Comercial (Onde estamos)
+- [x] Login e Segurança Básica.
+- [x] Cadastro de Clientes (com validações de CPF/CNPJ).
+- [ ] **Próximo Passo**: Cadastro de Produtos (Serviços/Materiais).
+- [ ] Emissão de Pedidos de Venda Simples.
+
+### Fase 2: Ciclo Financeiro Básico
+- [ ] Geração de Títulos a Receber (vindo do Pedido).
+- [ ] Contas a Pagar (Entradas manuais).
+- [ ] Relatório de Fluxo de Caixa Diário.
+
+### Fase 3: Suprimentos e Estoque
+- [ ] Cadastro de Fornecedores.
+- [ ] Controle de Entrada de Mercadorias (Alimentar Estoque).
+- [ ] Inventário (Ver o que tem em mãos).
+
+### Fase 4: Integração Fiscal e NF-e
+- [ ] Configuração de Alíquotas (Simples Nacional).
+- [ ] Transmissão de NF-e (Integração com API de faturamento).
+
+---
+
+## 🚫 Módulos Descartados (Manter o sistema LEVE)
+- **Manufatura/MRP**: Complexidade de chão de fábrica não cabe em um ERP simples inicial.
+- **Qualidade/Metrologia**: Relatórios muito específicos que travam o processo ágil.
+- **Organizacional (RH)**: Folha de pagamento é melhor gerida por sistemas especialistas ou contabilidade externa.
+- **Filantropia/Obras**: Segmentos muito específicos.
+
+> [!TIP]
+> **Filosofia do Sistema**: "Fazer o básico com excelência é melhor do que ter mil botões que ninguém usa."
