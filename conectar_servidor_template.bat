@@ -2,19 +2,21 @@
 set DLC=C:\Progress\OpenEdge
 set PATH=%DLC%\bin;%PATH%
 
+:: Garante que o script rode a partir da pasta onde ele esta
+cd /d "%~dp0"
+
 :: ============================================================
 :: CONFIGURACAO DE CONEXAO
 :: ============================================================
 :: Mude o IP abaixo para o IP do seu Servidor.
-:: Se estiver na mesma rede local, use: 192.168.1.8
-:: Se estiver usando Radmin VPN, use o IP que aparece no Radmin do Servidor.
 set SERVER_IP=192.168.1.8
 set SERVER_PORT=5555
 :: ============================================================
 
 echo Conectando ao Banco de Dados Infocena em %SERVER_IP%:%SERVER_PORT%...
 
-prowin.exe -db infocena -H %SERVER_IP% -S %SERVER_PORT% -N TCP -p 01-projeto-infocena\gui_version\interface_login.w
+:: -T %TEMP%: Define onde os arquivos temporarios serao criados (resolve erro 354)
+prowin.exe -db infocena -H %SERVER_IP% -S %SERVER_PORT% -N TCP -T %TEMP% -p 01-projeto-infocena\gui_version\interface_login.w
 
 if %errorlevel% neq 0 (
     echo.
