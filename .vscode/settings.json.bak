@@ -1,0 +1,11 @@
+{
+    "abl.configuration.binDir": "C:\\Progress\\OpenEdge\\bin",
+    "abl.configuration.dlc": "C:\\Progress\\OpenEdge",
+    "abl.configuration.runtimes": [
+        {
+            "name": "OpenEdge 12.8",
+            "path": "C:\\Progress\\OpenEdge",
+            "default": true
+        }
+    ]
+}

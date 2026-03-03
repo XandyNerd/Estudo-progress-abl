@@ -1,0 +1,3 @@
+Iniciando carga...
+** "backend/database/venda.df" was not found. (293)
+Sem erros de compilacao no script de carga.
