@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc versao="4.00" xmlns="http://www.portalfiscal.inf.br/nfe">
+    <NFe>
+        <infNFe Id="NFe35230911222333000144550010000001231000001234" versao="4.00">
+            <ide>
+                <nNF>123</nNF>
+                <serie>1</serie>
+                <dhEmi>2026-03-01T10:00:00-03:00</dhEmi>
+            </ide>
+            <emit>
+                <CNPJ>11222333000144</CNPJ>
+                <xNome>DISTRIBUIDORA DE DOCES LTDA</xNome>
+            </emit>
+            <det nItem="1">
+                <prod>
+                    <cProd>4</cProd>
+                    <xProd>COBERTURA NESTLE 1KG CHOCOLATE</xProd>
+                    <qCom>10.00</qCom>
+                    <vUnCom>5.00</vUnCom>
+                    <vProd>50.00</vProd>
+                </prod>
+            </det>
+            <det nItem="2">
+                <prod>
+                    <cProd>3</cProd>
+                    <xProd>SABAO EM PO OMO MULTI 1KG</xProd>
+                    <qCom>5.00</qCom>
+                    <vUnCom>15.30</vUnCom>
+                    <vProd>76.50</vProd>
+                </prod>
+            </det>
+            <total>
+                <ICMSTot>
+                    <vNF>126.50</vNF>
+                </ICMSTot>
+            </total>
+        </infNFe>
+    </NFe>
+</nfeProc>

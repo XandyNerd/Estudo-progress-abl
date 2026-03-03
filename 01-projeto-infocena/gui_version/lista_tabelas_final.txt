@@ -1,0 +1,9 @@
+Usuario
+Cliente
+Produto
+Fornecedor
+PedidoCompra
+ItemPedidoCompra
+ContasPagar
+NotaFiscal
+ItemNotaFiscal

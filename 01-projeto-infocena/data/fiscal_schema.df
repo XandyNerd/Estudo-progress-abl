@@ -1,0 +1,200 @@
+ADD TABLE "NCM"
+  AREA "Schema Area"
+  DESCRIPTION "Cadastro de NCM e Aliquotas Federais"
+  DUMP-NAME "ncm"
+
+ADD FIELD "CodNCM" OF "NCM" AS character 
+  DESCRIPTION "Codigo NCM"
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "NCM"
+  POSITION 2
+  MAX-WIDTH 16
+  HELP "Informe o codigo NCM do produto"
+  ORDER 10
+
+ADD FIELD "Descricao" OF "NCM" AS character 
+  DESCRIPTION "Descricao do NCM"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descricao"
+  POSITION 3
+  MAX-WIDTH 200
+  ORDER 20
+
+ADD FIELD "AliqIPI" OF "NCM" AS decimal 
+  DESCRIPTION "Aliquota de IPI"
+  FORMAT ">>9.99"
+  INITIAL "0"
+  LABEL "Aliq. IPI"
+  POSITION 4
+  MAX-WIDTH 20
+  DECIMALS 2
+  ORDER 30
+
+ADD INDEX "PK_NCM" OF "NCM"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CodNCM" ASCENDING 
+
+ADD TABLE "CFOP"
+  AREA "Schema Area"
+  DESCRIPTION "Codigos Fiscais de Operacao"
+  DUMP-NAME "cfop"
+
+ADD FIELD "CodCFOP" OF "CFOP" AS character 
+  DESCRIPTION "Codigo CFOP"
+  FORMAT "x(4)"
+  INITIAL ""
+  LABEL "CFOP"
+  POSITION 2
+  MAX-WIDTH 8
+  ORDER 10
+
+ADD FIELD "Descricao" OF "CFOP" AS character 
+  DESCRIPTION "Descricao do CFOP"
+  FORMAT "x(100)"
+  INITIAL ""
+  LABEL "Descricao"
+  POSITION 3
+  MAX-WIDTH 200
+  ORDER 20
+
+ADD FIELD "GeraFinanceiro" OF "CFOP" AS logical 
+  DESCRIPTION "Indica se gera Contas a Receber/Pagar"
+  FORMAT "SIM/NAO"
+  INITIAL "no"
+  LABEL "Gera Financeiro"
+  POSITION 4
+  MAX-WIDTH 1
+  ORDER 30
+
+ADD INDEX "PK_CFOP" OF "CFOP"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CodCFOP" ASCENDING 
+
+ADD TABLE "RegraFiscal"
+  AREA "Schema Area"
+  DESCRIPTION "Regras de ICMS"
+  DUMP-NAME "regrafiscal"
+
+ADD FIELD "UF_Origem" OF "RegraFiscal" AS character 
+  DESCRIPTION "Estado de Origem"
+  FORMAT "x(2)"
+  INITIAL ""
+  LABEL "UF Origem"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "UF_Destino" OF "RegraFiscal" AS character 
+  DESCRIPTION "Estado de Destino"
+  FORMAT "x(2)"
+  INITIAL ""
+  LABEL "UF Destino"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "AliqICMS" OF "RegraFiscal" AS decimal 
+  DESCRIPTION "Aliquota ICMS"
+  FORMAT ">>9.99"
+  INITIAL "0"
+  LABEL "Aliq. ICMS"
+  POSITION 4
+  MAX-WIDTH 20
+  DECIMALS 2
+  ORDER 30
+
+ADD FIELD "CodCFOP" OF "RegraFiscal" AS character 
+  DESCRIPTION "CFOP Padrao para a regra"
+  FORMAT "x(4)"
+  INITIAL ""
+  LABEL "CFOP"
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 40
+
+ADD INDEX "IDX_REGRA" OF "RegraFiscal"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "UF_Origem" ASCENDING 
+  INDEX-FIELD "UF_Destino" ASCENDING 
+
+ADD TABLE "ContasReceber"
+  AREA "Schema Area"
+  DESCRIPTION "Titulos de Contas a Receber"
+  DUMP-NAME "contasreceber"
+
+ADD FIELD "Id_Titulo" OF "ContasReceber" AS integer 
+  DESCRIPTION "ID do Titulo"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "ID Titulo"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "Id_Venda" OF "ContasReceber" AS integer 
+  DESCRIPTION "ID da Venda Origem"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "ID Venda"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "CodCliente" OF "ContasReceber" AS integer 
+  DESCRIPTION "Codigo do Cliente"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Cliente"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "DataEmissao" OF "ContasReceber" AS date 
+  DESCRIPTION "Data de Emissao"
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Emissao"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "DataVencimento" OF "ContasReceber" AS date 
+  DESCRIPTION "Data de Vencimento"
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Vencimento"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "Valor" OF "ContasReceber" AS decimal 
+  DESCRIPTION "Valor do Titulo"
+  FORMAT "->>>,>>9.99"
+  INITIAL "0"
+  LABEL "Valor"
+  POSITION 7
+  MAX-WIDTH 20
+  DECIMALS 2
+  ORDER 60
+
+ADD FIELD "Situacao" OF "ContasReceber" AS character 
+  DESCRIPTION "Status do Titulo (Aberto/Pago/Cancelado)"
+  FORMAT "x(10)"
+  INITIAL "Aberto"
+  LABEL "Situacao"
+  POSITION 8
+  MAX-WIDTH 20
+  ORDER 70
+
+ADD INDEX "PK_RECEBER" OF "ContasReceber"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "Id_Titulo" ASCENDING 
+
+ADD INDEX "IDX_CLI_REC" OF "ContasReceber"
+  INDEX-FIELD "CodCliente" ASCENDING 

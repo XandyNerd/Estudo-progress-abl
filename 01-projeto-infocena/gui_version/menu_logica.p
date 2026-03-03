@@ -7,6 +7,13 @@ DEFINE INPUT PARAMETER pAcao        AS CHARACTER NO-UNDO.
  * Recebe o clique do usuario na Interface_Menu.w e processa a regra de negocio
  */
 
+/* Variaveis para controle de tela modular */
+DEFINE VARIABLE iState  AS INTEGER NO-UNDO.
+DEFINE VARIABLE iWidth  AS INTEGER NO-UNDO.
+DEFINE VARIABLE iHeight AS INTEGER NO-UNDO.
+DEFINE VARIABLE iX      AS INTEGER NO-UNDO.
+DEFINE VARIABLE iY      AS INTEGER NO-UNDO.
+
 CASE pAcao:
     WHEN "SUPRIMENTOS" THEN DO:
         MESSAGE "Modulo de SUPRIMENTOS em desenvolvimento..." VIEW-AS ALERT-BOX INFORMATION.
@@ -29,7 +36,16 @@ CASE pAcao:
     END.
     
     WHEN "FINANCAS" THEN DO:
-        MESSAGE "Modulo de FINANCAS em desenvolvimento..." VIEW-AS ALERT-BOX INFORMATION.
+        /* Redireciona para a nova interface modular */
+        RUN interface_financas.w (INPUT pUsuarioNome, 
+                                  INPUT-OUTPUT iState, 
+                                  INPUT-OUTPUT iWidth, 
+                                  INPUT-OUTPUT iHeight, 
+                                  INPUT-OUTPUT iX, 
+                                  INPUT-OUTPUT iY) NO-ERROR.
+        
+        IF ERROR-STATUS:ERROR THEN
+            MESSAGE "Erro ao carregar Interface de Financas. Verifique se o arquivo existe." VIEW-AS ALERT-BOX ERROR.
     END.
     
     WHEN "CONTROLLER" THEN DO:

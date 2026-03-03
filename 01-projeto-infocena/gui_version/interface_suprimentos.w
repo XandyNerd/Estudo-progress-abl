@@ -206,6 +206,22 @@ DEFINE BROWSE brFornecedores QUERY qFornecedores
                Fornecedor.PontoReferencia FORMAT "X(30)"  LABEL "Pto. Ref."
        WITH NO-ROW-MARKERS SEPARATORS SIZE 194 BY 10 FIT-LAST-COLUMN.
 
+/* Gestão de Estoque */
+DEFINE QUERY qEstoque FOR Produto SCROLLING.
+DEFINE VARIABLE iTotalItens AS INTEGER NO-UNDO.
+DEFINE VARIABLE dValorEstoque AS DECIMAL NO-UNDO.
+DEFINE VARIABLE lSomenteCritico AS LOGICAL NO-UNDO INITIAL NO.
+DEFINE VARIABLE cBuscaEstoque AS CHARACTER FORMAT "X(40)" NO-UNDO.
+
+DEFINE BROWSE brEstoque QUERY qEstoque
+    DISPLAY Produto.Id_Produto COLUMN-LABEL "Cod" FORMAT ">>>>>>9"
+            Produto.Descricao  COLUMN-LABEL "Produto" FORMAT "X(60)"
+            Produto.Marca      COLUMN-LABEL "Marca"   FORMAT "X(20)"
+            Produto.Quantidade_Estoque COLUMN-LABEL "Saldo"  FORMAT "->>>,>>9.99"
+            Produto.Estoque_Minimo COLUMN-LABEL "Minimo" FORMAT "->>>,>>9.99"
+            (IF Produto.Quantidade_Estoque <= Produto.Estoque_Minimo THEN "REPOR" ELSE "OK") COLUMN-LABEL "Status" FORMAT "X(10)"
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 174 BY 15 FIT-LAST-COLUMN.
+
 
 DEFINE BUTTON btn-produtos 
      LABEL "CADASTRO DE PRODUTOS" 
@@ -230,6 +246,9 @@ DEFINE BUTTON btn-estoque
 DEFINE BUTTON btn-voltar 
      LABEL "Voltar" 
      SIZE 15 BY 1.52.
+
+DEFINE BUTTON btnVoltarEstoque LABEL "Voltar" SIZE 15 BY 1.2.
+DEFINE RECTANGLE RectTopoEstoque SIZE 180 BY 4 BGCOLOR 1 FGCOLOR 15.
 
 /* Variaveis e Botoes Nota Fiscal */
 DEFINE VARIABLE cChaveAcesso    AS CHARACTER FORMAT "X(44)" NO-UNDO.
@@ -335,7 +354,7 @@ DEFINE FRAME fNFeEntrada
     
     brItensNFe AT ROW 16.0 COL 8
     
-    tVincPedido AT ROW 29.0 COL 18 COLON-ALIGNED LABEL "Nº Pedido Compra" VIEW-AS FILL-IN SIZE 12 BY 1
+    tVincPedido AT ROW 29.0 COL 22 COLON-ALIGNED LABEL "Nº Pedido Compra" VIEW-AS FILL-IN SIZE 12 BY 1
     btnVincularPed AT ROW 29.0 COL 35
     
     btnVoltarNFe   AT ROW 31.8 COL 6
@@ -344,10 +363,27 @@ DEFINE FRAME fNFeEntrada
     WITH 1 DOWN NO-BOX OVERLAY THREE-D SIDE-LABELS NO-UNDERLINE AT COLUMN 1 ROW 1 SIZE 130 BY 34.
 
 /* Frame Vazio de Estoque */
+/* Frame de Gestao de Estoque */
 DEFINE FRAME fEstoque
-    "EM BREVE - GESTAO DE ESTOQUE" VIEW-AS TEXT AT ROW 5 COL 5
-    WITH 1 DOWN NO-BOX OVERLAY THREE-D 
-         SIZE 120 BY 25.
+    RectTopoEstoque AT ROW 1.5 COL 1
+    "MODULO SUPRIMENTOS - GESTAO DE ESTOQUE" VIEW-AS TEXT
+      SIZE 70 BY 1 AT ROW 3.0 COL 30 FONT 6 BGCOLOR 1 FGCOLOR 15
+    
+    "FILTROS DE VISUALIZACAO" AT ROW 7.0 COL 7 FONT 6
+    lSomenteCritico AT ROW 8.0 COL 8 VIEW-AS TOGGLE-BOX LABEL "Mostrar somente Itens Críticos (Abaixo do Mínimo)"
+    cBuscaEstoque AT ROW 8.0 COL 85 COLON-ALIGNED LABEL "Pesquisar (Nome/Marca)"
+    
+    brEstoque AT ROW 10.0 COL 5
+    
+    "RESUMO DO PATRIMONIO EM ESTOQUE" AT ROW 26.5 COL 7 FONT 6
+    "Total Itens Unicos:" AT ROW 28.0 COL 7
+    iTotalItens AT ROW 28.0 COL 25 NO-LABEL VIEW-AS FILL-IN SIZE 10 BY 1
+    "Valor Total (Custo):" AT ROW 28.0 COL 45
+    dValorEstoque AT ROW 28.0 COL 65 NO-LABEL VIEW-AS FILL-IN SIZE 20 BY 1
+    
+    btnVoltarEstoque AT ROW 28.0 COL 150
+    
+    WITH 1 DOWN NO-BOX OVERLAY THREE-D SIDE-LABELS NO-UNDERLINE AT COLUMN 1 ROW 1 SIZE 180 BY 32.
 
 /* Frame de Compras */
 DEFINE FRAME fCompras
@@ -1562,6 +1598,77 @@ DO:
     ENABLE ALL EXCEPT cChaveAcesso cNumeroNF cNomeFornecedor dTotalNFe WITH FRAME fNFeEntrada.
 END.
 
+ON CHOOSE OF btn-estoque IN FRAME fMain DO:
+    RUN abrirEstoque.
+END.
+
+PROCEDURE abrirEstoque:
+    HIDE FRAME fMain.
+    RUN atualizarDadosEstoque.
+    ENABLE ALL WITH FRAME fEstoque IN WINDOW C-Win.
+    VIEW FRAME fEstoque.
+    
+    ASSIGN FRAME fEstoque:X = (C-Win:WIDTH-PIXELS - FRAME fEstoque:WIDTH-PIXELS) / 2
+           FRAME fEstoque:Y = (C-Win:HEIGHT-PIXELS - FRAME fEstoque:HEIGHT-PIXELS) / 2 NO-ERROR.
+END PROCEDURE.
+
+PROCEDURE atualizarDadosEstoque:
+    IF VALID-HANDLE(FRAME fEstoque:HANDLE) THEN
+        ASSIGN lSomenteCritico = lSomenteCritico:CHECKED IN FRAME fEstoque
+               cBuscaEstoque   = cBuscaEstoque:SCREEN-VALUE IN FRAME fEstoque.
+    
+    IF lSomenteCritico THEN
+        OPEN QUERY qEstoque FOR EACH Produto WHERE Produto.Quantidade_Estoque <= Produto.Estoque_Minimo
+                                               AND (Produto.Descricao MATCHES ("*" + cBuscaEstoque + "*")
+                                                OR Produto.Marca     MATCHES ("*" + cBuscaEstoque + "*")) NO-LOCK.
+    ELSE
+        OPEN QUERY qEstoque FOR EACH Produto WHERE (Produto.Descricao MATCHES ("*" + cBuscaEstoque + "*")
+                                                OR  Produto.Marca     MATCHES ("*" + cBuscaEstoque + "*")) NO-LOCK.
+        
+    RUN atualizarResumoEstoque.
+END PROCEDURE.
+
+PROCEDURE atualizarResumoEstoque:
+    DEFINE VARIABLE cMsgLogica AS CHARACTER NO-UNDO.
+    
+    /* Chamada da logica separada (Arquitetura Profissional) */
+    RUN estoque_logica.p (INPUT "CALCULAR_RESUMO",
+                          OUTPUT iTotalItens,
+                          OUTPUT dValorEstoque,
+                          OUTPUT cMsgLogica).
+    
+    IF VALID-HANDLE(FRAME fEstoque:HANDLE) THEN
+        ASSIGN iTotalItens:SCREEN-VALUE IN FRAME fEstoque   = STRING(iTotalItens)
+               dValorEstoque:SCREEN-VALUE IN FRAME fEstoque = STRING(dValorEstoque, "->>>,>>>,>>9.99").
+END PROCEDURE.
+
+ON CHOOSE OF btnVoltarEstoque IN FRAME fEstoque DO:
+    HIDE FRAME fEstoque.
+    VIEW FRAME fMain.
+END.
+
+ON VALUE-CHANGED OF lSomenteCritico IN FRAME fEstoque DO:
+    RUN atualizarDadosEstoque.
+END.
+
+ON ANY-KEY OF cBuscaEstoque IN FRAME fEstoque DO:
+    /* Pequeno delay ou aguardar Enter para nao sobrecarregar o banco em cada tecla */
+    IF LASTKEY = 13 THEN /* ENTER */
+        RUN atualizarDadosEstoque.
+END.
+
+ON ROW-DISPLAY OF brEstoque IN FRAME fEstoque DO:
+    /* Coloracao de alerta para itens criticos */
+    IF Produto.Quantidade_Estoque <= Produto.Estoque_Minimo THEN DO:
+        Produto.Quantidade_Estoque:BGCOLOR IN BROWSE brEstoque = 12. 
+        Produto.Quantidade_Estoque:FGCOLOR IN BROWSE brEstoque = 15.
+    END.
+    ELSE DO:
+        Produto.Quantidade_Estoque:BGCOLOR IN BROWSE brEstoque = ?.
+        Produto.Quantidade_Estoque:FGCOLOR IN BROWSE brEstoque = ?.
+    END.
+END.
+
 ON CHOOSE OF btnImportarXML IN FRAME fNFeEntrada /* Importar XML */
 DO:
     DEFINE VARIABLE cCabecalho AS CHARACTER NO-UNDO.
@@ -1623,16 +1730,25 @@ DO:
         MESSAGE "Importe um XML antes de efetivar!" VIEW-AS ALERT-BOX WARNING.
         RETURN.
     END.
-    
-    /* Confirmacao do usuario */
-    MESSAGE "Tem certeza que deseja EFETIVAR esta Nota Fiscal?" + CHR(10)
-          + "Isso ira:" + CHR(10)
-          + "  - Gravar a NFe no banco de dados" + CHR(10)
-          + "  - Atualizar o estoque dos produtos" + CHR(10)
-          + "  - Gerar um titulo no Contas a Pagar"
-        VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lConfirma.
-    
-    IF NOT lConfirma THEN RETURN.
+
+    /* Valida vinculo de pedido (Melhoria de Logica) */
+    IF tVincPedido:SCREEN-VALUE IN FRAME fNFeEntrada = "" OR 
+       tVincPedido:SCREEN-VALUE IN FRAME fNFeEntrada = "0" THEN DO:
+        MESSAGE "Atencao: Esta Nota Fiscal NAO possui um Pedido de Compra vinculado." + CHR(10)
+              + "Deseja efetivar o recebimento avulso (sem pedido)?"
+            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lConfirma.
+        IF NOT lConfirma THEN RETURN.
+    END.
+    ELSE DO:
+        /* Confirmacao do usuario padrão */
+        MESSAGE "Tem certeza que deseja EFETIVAR esta Nota Fiscal?" + CHR(10)
+              + "Isso ira:" + CHR(10)
+              + "  - Gravar a NFe no banco de dados" + CHR(10)
+              + "  - Atualizar o estoque dos produtos" + CHR(10)
+              + "  - Gerar um titulo no Contas a Pagar"
+            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lConfirma.
+        IF NOT lConfirma THEN RETURN.
+    END.
     
     /* Monta string de parametros: Chave|NumNF|Fornecedor|Total|IdPedido */
     cDadosEfet = cChaveAcesso:SCREEN-VALUE IN FRAME fNFeEntrada + "|"

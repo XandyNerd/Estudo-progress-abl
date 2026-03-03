@@ -1,0 +1,109 @@
+ADD TABLE "Venda"
+  AREA "Schema Area"
+  DESCRIPTION "Cabecalho de Vendas"
+  DUMP-NAME "venda"
+
+ADD FIELD "Id_Venda" OF "Venda" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "CodCliente" OF "Venda" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "DataVenda" OF "Venda" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "ValorTotal" OF "Venda" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 40
+
+ADD FIELD "StatusVenda" OF "Venda" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 40
+  ORDER 50
+
+ADD INDEX "Idx_Venda" ON "Venda" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "Id_Venda" ASCENDING 
+
+ADD TABLE "ItemVenda"
+  AREA "Schema Area"
+  DESCRIPTION "Itens da Venda"
+  DUMP-NAME "itemvenda"
+
+ADD FIELD "Id_Venda" OF "ItemVenda" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "Sequencia" OF "ItemVenda" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "Id_Produto" OF "ItemVenda" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "Quantidade" OF "ItemVenda" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 40
+
+ADD FIELD "Preco_Unit" OF "ItemVenda" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 50
+
+ADD FIELD "Total_Item" OF "ItemVenda" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 60
+
+ADD INDEX "Idx_ItemVenda" ON "ItemVenda" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "Id_Venda" ASCENDING 
+  INDEX-FIELD "Sequencia" ASCENDING 
+
+.
+PSC
+cpstream=ibm850
+.
+0000000000

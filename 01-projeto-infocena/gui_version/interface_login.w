@@ -239,16 +239,16 @@ ON CHOOSE OF bntLogin IN FRAME winLogin /* Login */
 DO:
   DEFINE VARIABLE lSucesso AS LOGICAL NO-UNDO.
   
-  ASSIGN cEmail cSenha. 
   
-  RUN valida_login.p (INPUT cEmail, 
-                      INPUT cSenha, 
-                      OUTPUT lSucesso).
+  /* Roda a lógica localmente */
+  DEFINE VARIABLE cNomeUsuario AS CHARACTER NO-UNDO.
+  RUN 01-projeto-infocena\gui_version\login_service.p (INPUT cEmail, 
+                                     INPUT cSenha, 
+                                     OUTPUT lSucesso,
+                                     OUTPUT cNomeUsuario).
   
   IF lSucesso THEN DO:
-      FIND FIRST infocena.Usuario WHERE infocena.Usuario.Email = cEmail NO-LOCK NO-ERROR.
-      
-      MESSAGE "Login realizado com sucesso! Bem-vindo(a), " + (IF AVAILABLE infocena.Usuario THEN infocena.Usuario.Nome ELSE cEmail) + "." 
+      MESSAGE "Login realizado com sucesso! Bem-vindo(a), " + cNomeUsuario + "." 
               VIEW-AS ALERT-BOX INFORMATION.
       
       /* Captura dimensoes da tela atual do Login */
@@ -267,7 +267,7 @@ DO:
       ASSIGN C-Win:VISIBLE = NO
              C-Win:HIDDEN  = YES.
       
-      RUN interface_menu.w (INPUT (IF AVAILABLE infocena.Usuario THEN infocena.Usuario.Nome ELSE cEmail),
+      RUN interface_menu.w (INPUT cNomeUsuario,
                             INPUT-OUTPUT iState,
                             INPUT-OUTPUT iWidth,
                             INPUT-OUTPUT iHeight,

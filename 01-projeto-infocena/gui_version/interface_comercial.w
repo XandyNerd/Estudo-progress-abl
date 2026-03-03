@@ -76,6 +76,21 @@ DEFINE BROWSE brClientes QUERY qClientes NO-LOCK
     WITH NO-ROW-MARKERS SEPARATORS SIZE 124 BY 8 FIT-LAST-COLUMN.
 
 /* Botoes de Clientes */
+/* Tabela Temporária de Itens do Pedido de Venda */
+{vendas.i}
+DEFINE TEMP-TABLE ttTmpBusca LIKE ttItensVenda.
+
+DEFINE QUERY qItensVenda FOR ttItensVenda SCROLLING.
+DEFINE QUERY qProdBusca  FOR Produto SCROLLING.
+DEFINE BUFFER bItensVenda FOR ttItensVenda.
+
+/* Variáveis do Pedido de Venda */
+DEFINE VARIABLE iCodCliVenda   AS INTEGER   FORMAT ">>>>>>>9" NO-UNDO.
+DEFINE VARIABLE cNomeCliVenda  AS CHARACTER FORMAT "X(60)"    NO-UNDO.
+DEFINE VARIABLE dTotalVenda    AS DECIMAL   FORMAT "->>>,>>>,>>9.99" NO-UNDO.
+DEFINE VARIABLE iBuscaProdVenda AS INTEGER   FORMAT ">>>>>>>9" NO-UNDO.
+DEFINE VARIABLE dQtdVenda      AS DECIMAL   FORMAT "->>>,>>9.99" NO-UNDO.
+
 DEFINE VARIABLE lEmEdicao    AS LOGICAL   INITIAL NO NO-UNDO.
 DEFINE BUTTON btnSalvar   LABEL "&Salvar"   SIZE 15 BY 1.14.
 DEFINE BUTTON btnVoltarCli LABEL "&Voltar"   SIZE 15 BY 1.14.
@@ -114,6 +129,29 @@ DEFINE RECTANGLE rectEnd     SIZE 124 BY 5.
 
 DEFINE RECTANGLE rectFundo SIZE 126 BY 20.
 DEFINE RECTANGLE RectTopo  SIZE 130 BY 4.5 BGCOLOR 1 FGCOLOR 15.
+DEFINE RECTANGLE RectTopoVendas SIZE 150 BY 4.5 BGCOLOR 1 FGCOLOR 15.
+DEFINE RECTANGLE rectCabecalhoVenda SIZE 144 BY 5.
+DEFINE RECTANGLE rectItensVenda SIZE 144 BY 12.
+
+/* Browse de Pedido de Venda */
+DEFINE BROWSE brItensVenda QUERY qItensVenda
+    DISPLAY ttItensVenda.Sequencia COLUMN-LABEL "Seq"
+            ttItensVenda.Id_Produto COLUMN-LABEL "Cod"
+            ttItensVenda.Descricao   COLUMN-LABEL "Produto"
+            ttItensVenda.Quantidade  COLUMN-LABEL "Qtd"
+            ttItensVenda.Preco_Unit  COLUMN-LABEL "Vl Unit"
+            ttItensVenda.Total_Item  COLUMN-LABEL "Vl Total"
+    WITH 10 DOWN NO-LABELS SIZE 140 BY 8 FIT-LAST-COLUMN.
+
+DEFINE BUTTON btnBuscaCliVenda LABEL "Buscar" SIZE 12 BY 1.
+DEFINE BUTTON btnAdicItemVenda LABEL "Adicionar Item" SIZE 20 BY 1.2.
+DEFINE BUTTON btnRemItemVenda  LABEL "Remover Item"   SIZE 20 BY 1.2.
+DEFINE BUTTON btnFinalizarVenda LABEL "FINALIZAR VENDA" SIZE 25 BY 2 BGCOLOR 10 FGCOLOR 15 FONT 6.
+DEFINE BUTTON btnVoltarVenda   LABEL "Voltar" SIZE 15 BY 1.5.
+
+/* Menu de Contexto para Grade de Itens */
+DEFINE MENU mnuItensVenda 
+    MENU-ITEM mnuRemoverItem LABEL "Remover Item".
 
 /* ************************  Frame Definitions  *********************** */
 
@@ -162,6 +200,37 @@ DEFINE FRAME fClientes
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COLUMN 1 ROW 1
          SIZE 130 BY 28.
+
+/* Frame de Pedido de Venda */
+DEFINE FRAME fPedidos
+    RectTopoVendas AT ROW 1 COL 1
+    "MODULO COMERCIAL - NOVO PEDIDO DE VENDA" VIEW-AS TEXT
+      SIZE 70 BY 1 AT ROW 2.5 COL 40 FONT 6 BGCOLOR 1 FGCOLOR 15
+    
+    "DADOS DO CLIENTE" AT ROW 6.5 COL 5 FONT 6
+    rectCabecalhoVenda AT ROW 7.0 COL 3
+    iCodCliVenda AT ROW 8.5 COL 15 COLON-ALIGNED LABEL "Cod. Cliente"
+    btnBuscaCliVenda AT ROW 8.5 COL 32
+    cNomeCliVenda AT ROW 8.5 COL 65 COLON-ALIGNED LABEL "Cliente" VIEW-AS FILL-IN SIZE 50 BY 1
+    
+    "ITENS DO PEDIDO" AT ROW 12.5 COL 5 FONT 6
+    rectItensVenda AT ROW 13.0 COL 3
+    iBuscaProdVenda AT ROW 14.5 COL 15 COLON-ALIGNED LABEL "Cod. Produto"
+    dQtdVenda AT ROW 14.5 COL 45 COLON-ALIGNED LABEL "Quantidade" 
+    btnAdicItemVenda AT ROW 14.5 COL 70
+    brItensVenda AT ROW 16.5 COL 5
+    
+    "RESUMO DA VENDA" AT ROW 26.5 COL 5 FONT 6
+    "TOTAL DO PEDIDO (R$):" AT ROW 28.0 COL 10 FONT 6
+    dTotalVenda AT ROW 28.0 COL 35 NO-LABEL VIEW-AS FILL-IN SIZE 20 BY 1.5 FONT 6
+    
+    btnFinalizarVenda AT ROW 27.5 COL 100
+    btnVoltarVenda AT ROW 30.5 COL 5
+    
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COLUMN 1 ROW 1
+         SIZE 150 BY 32.
 
 /* *********************** Procedure Settings ************************ */
 
@@ -249,7 +318,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btn-pedido C-Win
 ON CHOOSE OF btn-pedido IN FRAME fMain /* PEDIDO DE VENDA */
 DO:
-  RUN logica_comercial.p (INPUT pUsuarioNome, INPUT "PEDIDOS").
+  RUN abrirVendas.
 END.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -259,11 +328,14 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btn-nfe C-Win
 ON CHOOSE OF btn-nfe IN FRAME fMain /* EMISSAO NF-e SIMPLIFICADA */
 DO:
-  RUN logica_comercial.p (INPUT pUsuarioNome, INPUT "NFE").
+  /* TESTE DA FASE 1 DE FATURAMENTO: Vamos forçar o faturamento do Pedido 1 */
+  DEFINE VARIABLE cMsg AS CHARACTER NO-UNDO.
+  
+  RUN logica_vendas.p (INPUT "FATURAR_PEDIDO", INPUT 1, INPUT-OUTPUT TABLE ttItensVenda, OUTPUT cMsg, INPUT 0).
+  MESSAGE "Resultado Faturamento (Fase 1): " SKIP cMsg VIEW-AS ALERT-BOX INFORMATION.
 END.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
 
 &Scoped-define SELF-NAME btn-voltar
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btn-voltar C-Win
@@ -411,6 +483,132 @@ END.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+
+ON CHOOSE OF btnBuscaCliVenda IN FRAME fPedidos DO:
+    FIND Cliente WHERE Cliente.CodCliente = INTEGER(iCodCliVenda:SCREEN-VALUE IN FRAME fPedidos) NO-LOCK NO-ERROR.
+    IF AVAILABLE Cliente THEN
+        ASSIGN cNomeCliVenda:SCREEN-VALUE IN FRAME fPedidos = Cliente.Nome.
+    ELSE
+        MESSAGE "Cliente nao encontrado!" VIEW-AS ALERT-BOX ERROR.
+END.
+
+ON CHOOSE OF btnAdicItemVenda IN FRAME fPedidos DO:
+    DEFINE VARIABLE cMsg     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iProxSeq AS INTEGER NO-UNDO.
+    DEFINE VARIABLE dPreco   AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE dTotal   AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE cDescTemp AS CHARACTER NO-UNDO.
+    
+    IF iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos = "0" OR dQtdVenda:SCREEN-VALUE IN FRAME fPedidos = "0" THEN DO:
+        MESSAGE "Informe o Produto e a Quantidade!" VIEW-AS ALERT-BOX ERROR.
+        RETURN.
+    END.
+
+    /* Busca dados do produto via logica em uma TT temporaria para nao limpar o carrinho */
+    EMPTY TEMP-TABLE ttTmpBusca.
+    
+    RUN logica_vendas.p (INPUT "BUSCAR_PRODUTO", 
+                         INPUT INTEGER(iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos),
+                         INPUT-OUTPUT TABLE ttTmpBusca,
+                         OUTPUT cMsg,
+                         INPUT 0).
+    
+    IF cMsg <> "SUCESSO" THEN DO:
+        MESSAGE cMsg VIEW-AS ALERT-BOX ERROR.
+        RETURN.
+    END.
+
+    /* Valida saldo */
+    RUN logica_vendas.p (INPUT "VALIDAR_ESTOQUE", 
+                         INPUT INTEGER(iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos),
+                         INPUT-OUTPUT TABLE ttTmpBusca, 
+                         OUTPUT cMsg,
+                         INPUT DECIMAL(dQtdVenda:SCREEN-VALUE IN FRAME fPedidos)).
+
+    IF cMsg <> "SUCESSO" THEN DO:
+        IF cMsg MATCHES "ERRO*" THEN DO:
+            MESSAGE cMsg VIEW-AS ALERT-BOX ERROR.
+            RETURN.
+        END.
+        IF cMsg MATCHES "AVISO*" THEN
+            MESSAGE cMsg VIEW-AS ALERT-BOX WARNING.
+    END.
+
+    /* Verifica se produto ja existe na lista (SOMA QUANTIDADES) */
+    FIND FIRST bItensVenda WHERE bItensVenda.Id_Produto = INTEGER(iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos) NO-ERROR.
+    IF AVAILABLE bItensVenda THEN DO:
+        DEFINE VARIABLE lConfirma AS LOGICAL NO-UNDO.
+        MESSAGE "Este produto já está na lista. Deseja somar a quantidade?" 
+            VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lConfirma.
+        IF NOT lConfirma THEN
+            RETURN.
+            
+        ASSIGN bItensVenda.Quantidade = bItensVenda.Quantidade + DECIMAL(dQtdVenda:SCREEN-VALUE IN FRAME fPedidos)
+               bItensVenda.Total_Item = bItensVenda.Quantidade * bItensVenda.Preco_Unit.
+    END.
+    ELSE DO:
+        /* Pega os dados que voltaram na TT e adiciona ao browse persistente */
+        FIND FIRST ttTmpBusca NO-LOCK.
+        ASSIGN dPreco    = ttTmpBusca.Preco_Unit
+               cDescTemp = ttTmpBusca.Descricao
+               dTotal    = dPreco * DECIMAL(dQtdVenda:SCREEN-VALUE IN FRAME fPedidos).
+
+        /* Adiciona ao "carrinho" real da sessão */
+        FIND LAST bItensVenda NO-LOCK NO-ERROR.
+        iProxSeq = (IF AVAILABLE bItensVenda THEN bItensVenda.Sequencia + 1 ELSE 1).
+        
+        CREATE ttItensVenda.
+        ASSIGN ttItensVenda.Sequencia  = iProxSeq
+               ttItensVenda.Id_Produto = INTEGER(iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos)
+               ttItensVenda.Descricao   = cDescTemp
+               ttItensVenda.Quantidade  = DECIMAL(dQtdVenda:SCREEN-VALUE IN FRAME fPedidos)
+               ttItensVenda.Preco_Unit  = dPreco
+               ttItensVenda.Total_Item  = dTotal.
+    END.
+
+    OPEN QUERY qItensVenda FOR EACH ttItensVenda.
+    RUN recalcularTotalVenda.
+    
+    /* Limpa campos de busca de item */
+    ASSIGN iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos = "0"
+           dQtdVenda:SCREEN-VALUE IN FRAME fPedidos = "0".
+END.
+
+ON CHOOSE OF btnVoltarVenda IN FRAME fPedidos DO:
+    HIDE FRAME fPedidos.
+    RUN enable_UI.
+END.
+
+ON CHOOSE OF btnFinalizarVenda IN FRAME fPedidos DO:
+    DEFINE VARIABLE cMsg AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lConfirmaFim AS LOGICAL NO-UNDO.
+    MESSAGE "Confirma a finalização desta venda?" VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lConfirmaFim.
+    IF NOT lConfirmaFim THEN
+        RETURN.
+    RUN logica_vendas.p (INPUT "FINALIZAR_VENDA", 
+                         INPUT INTEGER(iCodCliVenda:SCREEN-VALUE IN FRAME fPedidos),
+                         INPUT-OUTPUT TABLE ttItensVenda, 
+                         OUTPUT cMsg,
+                         INPUT 0). /* qtd não usada aqui */
+
+    IF cMsg MATCHES "SUCESSO*" THEN DO:
+        MESSAGE "Venda finalizada com sucesso! Pedido Nº: " + ENTRY(2, cMsg, "|") VIEW-AS ALERT-BOX INFORMATION.
+        
+        /* Limpa a tela para a próxima venda */
+        ASSIGN iCodCliVenda:SCREEN-VALUE IN FRAME fPedidos = "0"
+               cNomeCliVenda:SCREEN-VALUE IN FRAME fPedidos = ""
+               iBuscaProdVenda:SCREEN-VALUE IN FRAME fPedidos = "0"
+               dQtdVenda:SCREEN-VALUE IN FRAME fPedidos = "0"
+               dTotalVenda = 0.
+               
+        DISPLAY dTotalVenda WITH FRAME fPedidos.
+        EMPTY TEMP-TABLE ttItensVenda.
+        OPEN QUERY qItensVenda FOR EACH ttItensVenda.
+    END.
+    ELSE DO:
+        MESSAGE cMsg VIEW-AS ALERT-BOX ERROR.
+    END.
+END.
 
 &UNDEFINE SELF-NAME
 
@@ -678,6 +876,39 @@ PROCEDURE excluir_cliente:
         MESSAGE "Cliente excluido!" VIEW-AS ALERT-BOX INFORMATION.
     END.
 END PROCEDURE.
+
+PROCEDURE abrirVendas:
+    HIDE FRAME fMain.
+    EMPTY TEMP-TABLE ttItensVenda.
+    OPEN QUERY qItensVenda FOR EACH ttItensVenda.
+    
+    ENABLE iCodCliVenda btnBuscaCliVenda cNomeCliVenda
+           iBuscaProdVenda dQtdVenda btnAdicItemVenda brItensVenda
+           btnFinalizarVenda btnVoltarVenda
+           WITH FRAME fPedidos IN WINDOW C-Win.
+           
+    ASSIGN FRAME fPedidos:X = (C-Win:WIDTH-PIXELS - FRAME fPedidos:WIDTH-PIXELS) / 2
+           FRAME fPedidos:Y = (C-Win:HEIGHT-PIXELS - FRAME fPedidos:HEIGHT-PIXELS) / 2 NO-ERROR.
+
+    /* Atribui o menu de contexto ao browse */
+    ASSIGN brItensVenda:POPUP-MENU IN FRAME fPedidos = MENU mnuItensVenda:HANDLE.
+END PROCEDURE.
+
+PROCEDURE recalcularTotalVenda:
+    dTotalVenda = 0.
+    FOR EACH ttItensVenda NO-LOCK:
+       dTotalVenda = dTotalVenda + ttItensVenda.Total_Item.
+    END.
+    DISPLAY dTotalVenda WITH FRAME fPedidos.
+END PROCEDURE.
+
+ON CHOOSE OF MENU-ITEM mnuRemoverItem DO:
+    IF AVAILABLE ttItensVenda THEN DO:
+        DELETE ttItensVenda.
+        OPEN QUERY qItensVenda FOR EACH ttItensVenda.
+        RUN recalcularTotalVenda.
+    END.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
